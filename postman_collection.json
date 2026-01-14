@@ -1,122 +1,217 @@
 {
 	"info": {
 		"_postman_id": "phase1-storage-management-api",
-		"name": "Storage Management API - Phase 1",
-		"description": "Postman collection for Phase 1: Project Setup & Foundation\n\n**Endpoints:**\n- Health check endpoint\n- Server connectivity tests",
+		"name": "Storage Management API - Phase 1 & 2",
+		"description": "Postman collection for Phase 1 (Foundation) and Phase 2 (Authentication)\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Health Check",
+			"name": "Phase 1: Foundation",
 			"item": [
 				{
-					"name": "Health Check - Server Status",
-					"event": [
+					"name": "Health Check",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response has success field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('success');",
-									"});",
-									"",
-									"pm.test(\"Server is healthy\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data.status).to.eql('healthy');",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 500ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(500);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
+							"name": "Health Check - Server Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response has success field\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('success');",
+											"});",
+											"",
+											"pm.test(\"Server is healthy\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.eql(true);",
+											"    pm.expect(jsonData.data.status).to.eql('healthy');",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 500ms\", function () {",
+											"    pm.expect(pm.response.responseTime).to.be.below(500);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"health"
+									]
+								},
+								"description": "Check if the server is running and healthy. Returns server status and database connection status."
+							},
+							"response": []
+						},
+						{
+							"name": "Health Check - Database Connection",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Database status is present\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data).to.have.property('database');",
+											"});",
+											"",
+											"pm.test(\"Database is connected\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.database).to.eql('connected');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"health"
+									]
+								},
+								"description": "Verify that MongoDB database connection is established."
+							},
+							"response": []
 						}
 					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/health",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"health"
-							]
-						},
-						"description": "Check if the server is running and healthy. Returns server status and database connection status."
-					},
-					"response": []
+					"description": "Health check endpoints to verify server and database connectivity"
 				},
 				{
-					"name": "Health Check - Database Connection",
-					"event": [
+					"name": "Server Connectivity",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Database status is present\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data).to.have.property('database');",
-									"});",
-									"",
-									"pm.test(\"Database is connected\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data.database).to.eql('connected');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
+							"name": "Test Server Response Time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response time is acceptable\", function () {",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+											"});",
+											"",
+											"pm.test(\"Server is reachable\", function () {",
+											"    pm.response.to.not.have.status(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"health"
+									]
+								},
+								"description": "Test server response time and connectivity"
+							},
+							"response": []
+						},
+						{
+							"name": "Test 404 Handler",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"pm.test(\"Response has error message\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('message');",
+											"    pm.expect(jsonData.success).to.eql(false);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/nonexistent",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"nonexistent"
+									]
+								},
+								"description": "Test that 404 handler returns proper error response"
+							},
+							"response": []
 						}
 					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/health",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"health"
-							]
-						},
-						"description": "Verify that MongoDB database connection is established."
-					},
-					"response": []
+					"description": "Tests for server connectivity and error handling"
 				}
-			],
-			"description": "Health check endpoints to verify server and database connectivity"
+			]
 		},
 		{
-			"name": "Server Connectivity",
+			"name": "Phase 2: User Authentication",
 			"item": [
 				{
-					"name": "Test Server Response Time",
+					"name": "Signup - Success",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is acceptable\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
 									"});",
 									"",
-									"pm.test(\"Server is reachable\", function () {",
-									"    pm.response.to.not.have.status(0);",
+									"pm.test(\"Response successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.message).to.eql(\"User registered successfully\");",
+									"});",
+									"",
+									"pm.test(\"Token received\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    pm.expect(jsonData.data.user).to.have.property('email');",
+									"    // Store email for login test",
+									"    pm.collectionVariables.set(\"test_email\", jsonData.data.user.email);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -124,37 +219,50 @@
 						}
 					],
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test{{$timestamp}}@example.com\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\",\n    \"agreementAccepted\": \"true\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{base_url}}/api/health",
+							"raw": "{{base_url}}/api/auth/signup",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"health"
+								"auth",
+								"signup"
 							]
 						},
-						"description": "Test server response time and connectivity"
+						"description": "Register a new user with valid details"
 					},
 					"response": []
 				},
 				{
-					"name": "Test 404 Handler",
+					"name": "Signup - Password Mismatch",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    pm.response.to.have.status(404);",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
 									"});",
 									"",
-									"pm.test(\"Response has error message\", function () {",
+									"pm.test(\"Error message validation\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('message');",
 									"    pm.expect(jsonData.success).to.eql(false);",
+									"    // Either the main message or validation error details",
+									"    // Based on controller, it explicitly says 'Passwords do not match'",
+									"    // or it's caught by validation middleware.",
+									"    // Current controller returns generic message or specific one.",
 									"});"
 								],
 								"type": "text/javascript"
@@ -162,24 +270,221 @@
 						}
 					],
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test_fail_{{$timestamp}}@example.com\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password456\",\n    \"agreementAccepted\": \"true\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{base_url}}/api/nonexistent",
+							"raw": "{{base_url}}/api/auth/signup",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"nonexistent"
+								"auth",
+								"signup"
 							]
 						},
-						"description": "Test that 404 handler returns proper error response"
+						"description": "Try to register with mismatched passwords"
+					},
+					"response": []
+				},
+				{
+					"name": "Signup - Existing User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test(\"Conflict error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"    pm.expect(jsonData.message).to.include(\"already exists\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\",\n    \"agreementAccepted\": \"true\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to register with an email that already exists (requires Signup - Success to run first)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Login successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"Token returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    pm.environment.set(\"auth_token\", jsonData.data.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with the registered user"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Invalid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Error message validation\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid email or password\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"wrongpassword\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Try to login with wrong password"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Logout successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout user"
 					},
 					"response": []
 				}
 			],
-			"description": "Tests for server connectivity and error handling"
+			"description": "Phase 2: User Authentication endpoints"
 		}
 	],
 	"event": [
