@@ -1,0 +1,2 @@
+﻿# Allow .env.example to be visible to Cursor
+!.env.example

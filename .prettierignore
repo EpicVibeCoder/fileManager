@@ -1,0 +1,12 @@
+node_modules
+.cursor
+dist
+build
+coverage
+.nyc_output
+.cache
+logs
+uploads
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
