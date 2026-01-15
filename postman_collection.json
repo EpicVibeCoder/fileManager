@@ -1824,7 +1824,7 @@
                   ]
             },
             {
-                  "name": "Phase 13: Token Rotation",
+                  "name": "Phase 12: Token Lifecycle",
                   "item": [
                         {
                               "name": "Refresh Token",
@@ -1862,6 +1862,34 @@
                                           }
                                     },
                                     "url": "{{base_url}}/api/auth/refresh-token"
+                              }
+                        },
+                        {
+                              "name": "Verify Access Denied After Logout",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 401\", function () {",
+                                                      "    pm.response.to.have.status(401);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/auth/profile",
+                                    "description": "Attempt to access protected resource with the revoked access token. Should fail immediately."
                               }
                         },
                         {
