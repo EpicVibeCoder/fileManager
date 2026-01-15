@@ -87,8 +87,119 @@ const logout = async (req, res) => {
       }
 };
 
+const editProfile = async (req, res) => {
+      try {
+            const { username } = req.body;
+            const userId = req.user._id || req.user.id;
+
+            const user = await User.findById(userId);
+            if (!user) {
+                  return sendResponse(res, 404, false, 'User not found', null);
+            }
+
+            user.username = username;
+            await user.save();
+
+            return sendResponse(res, 200, true, 'Username updated successfully', {
+                  user: user.toJSON(),
+            });
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error updating profile', null, { details: error.message });
+      }
+};
+
+const changePassword = async (req, res) => {
+      try {
+            const { oldPassword, newPassword } = req.body;
+            const userId = req.user._id || req.user.id;
+
+            const user = await User.findById(userId);
+            if (!user) {
+                  return sendResponse(res, 404, false, 'User not found', null);
+            }
+
+            // Check if user has a password (Google OAuth users might not)
+            if (!user.password) {
+                  return sendResponse(res, 400, false, 'Password change not available for this account', null);
+            }
+
+            // Verify old password
+            const isOldPasswordValid = await user.comparePassword(oldPassword);
+            if (!isOldPasswordValid) {
+                  return sendResponse(res, 401, false, 'Current password is incorrect', null);
+            }
+
+            // Update password
+            user.password = newPassword;
+            await user.save();
+
+            return sendResponse(res, 200, true, 'Password changed successfully', null);
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error changing password', null, { details: error.message });
+      }
+};
+
+const forgotPassword = async (req, res) => {
+      try {
+            const { email } = req.body;
+
+            const user = await User.findOne({ email });
+            if (!user) {
+                  // Don't reveal if email exists for security
+                  return sendResponse(res, 200, true, 'If the email exists, a password reset link has been sent', null);
+            }
+
+            // Generate reset token
+            const crypto = require('crypto');
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            const resetTokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+            user.resetPasswordToken = resetToken;
+            user.resetPasswordExpires = new Date(resetTokenExpiry);
+            await user.save();
+
+            // In production, send email with reset token
+            // For now, return token in response (remove in production!)
+            return sendResponse(res, 200, true, 'Password reset token generated', {
+                  resetToken, // Remove this in production - send via email instead
+                  expiresIn: '10 minutes',
+            });
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error processing password reset request', null, { details: error.message });
+      }
+};
+
+const resetPassword = async (req, res) => {
+      try {
+            const { token, newPassword } = req.body;
+
+            const user = await User.findOne({
+                  resetPasswordToken: token,
+                  resetPasswordExpires: { $gt: Date.now() },
+            });
+
+            if (!user) {
+                  return sendResponse(res, 400, false, 'Invalid or expired reset token', null);
+            }
+
+            // Update password and clear reset token
+            user.password = newPassword;
+            user.resetPasswordToken = null;
+            user.resetPasswordExpires = null;
+            await user.save();
+
+            return sendResponse(res, 200, true, 'Password reset successfully', null);
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error resetting password', null, { details: error.message });
+      }
+};
+
 module.exports = {
       signup,
       login,
       logout,
+      editProfile,
+      changePassword,
+      forgotPassword,
+      resetPassword,
 };
