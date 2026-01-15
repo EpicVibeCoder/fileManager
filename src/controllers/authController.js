@@ -1,4 +1,5 @@
 const RefreshToken = require('../models/RefreshToken');
+const User = require('../models/User');
 const { generateToken, generateRefreshToken } = require('../utils/jwt');
 const sendResponse = require('../utils/response');
 const passport = require('passport');
