@@ -340,4 +340,5 @@ module.exports = {
       resetPassword,
       googleAuth,
       googleCallback,
+      revokeToken,
 };
