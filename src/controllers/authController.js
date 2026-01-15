@@ -160,10 +160,11 @@ const forgotPassword = async (req, res) => {
 
             // In production, send email with reset token
             // For now, return token in response (remove in production!)
+            if (process.env.NODE_ENV === 'development') {
             return sendResponse(res, 200, true, 'Password reset token generated', {
                   resetToken, // Remove this in production - send via email instead
                   expiresIn: '10 minutes',
-            });
+            })};
       } catch (error) {
             return sendResponse(res, 500, false, 'Error processing password reset request', null, { details: error.message });
       }
