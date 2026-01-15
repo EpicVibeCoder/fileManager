@@ -167,7 +167,18 @@ const logout = async (req, res) => {
             // Revoke the refresh token provided by client
             const { refreshToken } = req.body;
             if (refreshToken) {
-                  await RefreshToken.findOneAndUpdate({ token: refreshToken }, { revoked: Date.now(), revokedByIp: req.ip });
+                  const tokenDoc = await RefreshToken.findOne({ token: refreshToken });
+                  if (tokenDoc) {
+                        // Revoke refresh token
+                        await RefreshToken.updateOne({ _id: tokenDoc._id }, { revoked: Date.now(), revokedByIp: req.ip });
+
+                        // Update user's lastLogoutAt to invalidate all current access tokens
+                        await User.findByIdAndUpdate(tokenDoc.user, { lastLogoutAt: Date.now() });
+                  }
+            } else if (req.user) {
+                  // Fallback if only access token is present (though client should send refresh token)
+                  // If we have req.user from auth middleware
+                  await User.findByIdAndUpdate(req.user._id, { lastLogoutAt: Date.now() });
             }
             return sendResponse(res, 200, true, 'Logout successful', null);
       } catch (error) {

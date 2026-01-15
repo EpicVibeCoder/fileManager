@@ -15,6 +15,14 @@ passport.use(
             try {
                   const user = await User.findById(payload.id || payload.userId);
                   if (user) {
+                        // Check if token was issued before the last logout
+                        if (user.lastLogoutAt) {
+                              const lastLogoutTime = new Date(user.lastLogoutAt).getTime() / 1000;
+                              // payload.iat is in seconds
+                              if (payload.iat < lastLogoutTime) {
+                                    return done(null, false);
+                              }
+                        }
                         return done(null, user);
                   }
                   return done(null, false);

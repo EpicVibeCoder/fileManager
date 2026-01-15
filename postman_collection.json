@@ -422,7 +422,13 @@
                               ],
                               "request": {
                                     "method": "POST",
-                                    "header": [],
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
                                     "body": {
                                           "mode": "raw",
                                           "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",

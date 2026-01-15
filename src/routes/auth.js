@@ -88,7 +88,9 @@ router.post('/api/auth/login', ...loginValidation, handleValidationErrors, authC
 router.post('/api/auth/refresh-token', authController.refreshToken);
 router.post('/api/auth/revoke-token', authController.revokeToken);
 
-router.post('/api/auth/logout', authController.logout);
+// Note: We use 'jwt' strategy here so we can get req.user to update lastLogoutAt
+// We set session: false
+router.post('/api/auth/logout', passport.authenticate('jwt', { session: false }), authController.logout);
 
 // Google OAuth routes
 router.get('/api/auth/google', authController.googleAuth);
