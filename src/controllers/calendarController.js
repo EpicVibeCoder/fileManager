@@ -11,11 +11,9 @@ const getItemsByDate = async (req, res) => {
                   return sendResponse(res, 400, false, 'Date parameter (YYYY-MM-DD) is required');
             }
 
-            const startDate = new Date(date);
-            startDate.setHours(0, 0, 0, 0);
-
-            const endDate = new Date(date);
-            endDate.setHours(23, 59, 59, 999);
+            // Interpret date as Local Time (Server Time)
+            const startDate = new Date(date + 'T00:00:00');
+            const endDate = new Date(date + 'T23:59:59.999');
 
             if (isNaN(startDate.getTime())) {
                   return sendResponse(res, 400, false, 'Invalid date format');

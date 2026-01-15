@@ -1763,8 +1763,8 @@
                                           "listen": "prerequest",
                                           "script": {
                                                 "exec": [
-                                                      "var date = new Date();",
-                                                      "var dateString = date.toISOString().split('T')[0];",
+                                                      "var d = new Date();",
+                                                      "var dateString = d.getFullYear() + \"-\" + (\"0\"+(d.getMonth()+1)).slice(-2) + \"-\" + (\"0\" + d.getDate()).slice(-2);",
                                                       "pm.collectionVariables.set(\"today\", dateString);"
                                                 ],
                                                 "type": "text/javascript"

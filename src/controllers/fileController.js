@@ -6,68 +6,110 @@ const fs = require('fs');
 const path = require('path');
 
 const uploadFile = async (req, res) => {
+      let uploadedFiles = [];
       try {
-            if (!req.file) {
-                  return sendResponse(res, 400, false, 'No file uploaded');
+            if (!req.files || req.files.length === 0) {
+                  return sendResponse(res, 400, false, 'No files uploaded');
             }
 
-            const { size, path: filePath, mimetype, originalname } = req.file;
-            const { folderId } = req.body;
+            const files = req.files;
             const userId = req.user._id;
+            const { folderId } = req.body;
 
-            // If folderId is provided, verify it exists and belongs to user
+            // 1. Calculate total size of all files
+            const totalUploadSize = files.reduce((acc, file) => acc + file.size, 0);
+
+            // 2. Check storage limit for the TOTAL size
+            const hasSpace = await checkStorageLimit(userId, totalUploadSize);
+            if (!hasSpace) {
+                  // Cleanup ALL physical files if total storage exceeded
+                  files.forEach((file) => {
+                        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+                  });
+                  return sendResponse(res, 400, false, 'Total upload size exceeds remaining storage limit');
+            }
+
+            // 3. Verify folder if provided (once)
             if (folderId) {
                   const folder = await Folder.findOne({ _id: folderId, userId });
                   if (!folder) {
+                        // Cleanup ALL physical files
+                        files.forEach((file) => {
+                              if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+                        });
                         return sendResponse(res, 404, false, 'Target folder not found');
                   }
             }
 
-            // Determine type
-            let type = 'doc';
-            if (mimetype.startsWith('image/')) type = 'image';
-            else if (mimetype === 'application/pdf') type = 'pdf';
+            const savedFiles = [];
 
-            // Check if file with same name and type exists
-            const existingFile = await File.findOne({
-                  name: originalname,
-                  type: type,
-                  userId: userId,
-            });
+            // 4. Process each file
+            for (const file of files) {
+                  const { size, path: filePath, mimetype, originalname } = file;
 
-            if (existingFile) {
-                  fs.unlinkSync(filePath);
-                  return sendResponse(res, 400, false, 'File with the same name and type already exists');
+                  // Determine type
+                  let type = 'doc';
+                  if (mimetype.startsWith('image/')) type = 'image';
+                  else if (mimetype === 'application/pdf') type = 'pdf';
+
+                  // Check if file with same name exists in target folder/root
+                  const existingFile = await File.findOne({
+                        name: originalname,
+                        type: type,
+                        userId: userId,
+                        folderId: folderId || null,
+                  });
+
+                  if (existingFile) {
+                        // For bulk upload, if one fails, current requirement implies we might want to stop or skip.
+                        // Common pattern: Fail the whole batch or return partial success.
+                        // Given user request "Respond with appropriate error", fail batch is safer for consistency.
+                        // Cleanup ALL uploaded files (including those processed so far in this request? No, usually just the temp ones)
+                        // Actually, we haven't saved any to DB yet, but physical files exist.
+                        // Let's cleanup EVERYTHING and return error.
+
+                        files.forEach((f) => {
+                              if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
+                        });
+                        return sendResponse(res, 400, false, `File '${originalname}' already exists in this destination`);
+                  }
+
+                  uploadedFiles.push(file); // Track for cleanup in catch block
             }
 
-            // Check storage limit
-            const hasSpace = await checkStorageLimit(userId, size);
-            if (!hasSpace) {
-                  // Remove the uploaded file if limit exceeded
-                  fs.unlinkSync(filePath);
-                  return sendResponse(res, 400, false, 'Storage limit exceeded');
+            // 5. Save all to DB
+            for (const file of files) {
+                  const { size, path: filePath, mimetype, originalname } = file;
+                  let type = 'doc';
+                  if (mimetype.startsWith('image/')) type = 'image';
+                  else if (mimetype === 'application/pdf') type = 'pdf';
+
+                  const newFile = new File({
+                        name: originalname,
+                        type,
+                        size,
+                        path: filePath,
+                        mimeType: mimetype,
+                        userId,
+                        folderId: folderId || null,
+                  });
+
+                  await newFile.save();
+                  savedFiles.push(newFile);
             }
 
-            const file = new File({
-                  name: originalname,
-                  type,
-                  size,
-                  path: filePath,
-                  mimeType: mimetype,
-                  userId,
-                  folderId: folderId || null,
-            });
+            // 6. Update storage usage (commit)
+            await updateStorageUsage(userId, totalUploadSize, 'add');
 
-            await file.save();
-            await updateStorageUsage(userId, size, 'add');
-
-            return sendResponse(res, 201, true, 'File uploaded successfully', file);
+            return sendResponse(res, 201, true, 'Files uploaded successfully', savedFiles);
       } catch (error) {
-            // Cleanup if error
-            if (req.file) {
-                  fs.unlinkSync(req.file.path);
+            // Cleanup: Delete any physical files uploaded in this request
+            if (req.files) {
+                  req.files.forEach((file) => {
+                        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+                  });
             }
-            return sendResponse(res, 500, false, 'Error uploading file', null, { details: error.message });
+            return sendResponse(res, 500, false, 'Error uploading files', null, { details: error.message });
       }
 };
 

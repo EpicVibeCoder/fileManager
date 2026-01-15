@@ -8,7 +8,7 @@ const upload = require('../middleware/upload');
 const requireAuth = passport.authenticate('jwt', { session: false });
 
 // Apply auth to individual routes
-router.post('/api/files/upload', requireAuth, upload.single('file'), fileController.uploadFile);
+router.post('/api/files/upload', requireAuth, upload.array('file', 50), fileController.uploadFile);
 router.get('/api/files', requireAuth, fileController.getFiles);
 router.get('/api/files/:id', requireAuth, fileController.getFileDetails);
 router.get('/api/files/:id/download', requireAuth, fileController.downloadFile);
