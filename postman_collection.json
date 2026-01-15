@@ -1317,6 +1317,491 @@
                               "response": []
                         }
                   ]
+            },
+            {
+                  "name": "Phase 7: Advanced File Operations",
+                  "item": [
+                        {
+                              "name": "Rename File",
+                              "request": {
+                                    "method": "PUT",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"name\": \"renamed_file.txt\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": "{{base_url}}/api/files/{{file_id}}/rename"
+                              }
+                        },
+                        {
+                              "name": "Duplicate File",
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/files/{{file_id}}/duplicate"
+                              }
+                        },
+                        {
+                              "name": "Delete File",
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/files/{{file_id}}"
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 8: Favorites",
+                  "item": [
+                        {
+                              "name": "Add File to Favorites",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Is Favorite\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data.isFavorite).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/favorites/files/{{file_id}}"
+                              }
+                        },
+                        {
+                              "name": "Add Folder to Favorites",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Is Favorite\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.isFavorite).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/favorites/folders/{{folder_id}}"
+                              }
+                        },
+                        {
+                              "name": "List Favorites",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Favorites returned\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.files).to.be.an('array');",
+                                                      "    pm.expect(jsonData.data.folders).to.be.an('array');",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/favorites"
+                              }
+                        },
+                        {
+                              "name": "Remove File from Favorites",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Is Not Favorite\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.isFavorite).to.eql(false);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/favorites/files/{{file_id}}"
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 9: Dashboard",
+                  "item": [
+                        {
+                              "name": "Get Dashboard Stats",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Stats structure\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data).to.have.property('storage');",
+                                                      "    pm.expect(jsonData.data).to.have.property('fileStats');",
+                                                      "    pm.expect(jsonData.data).to.have.property('recentItems');",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/dashboard"
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 10: Vault",
+                  "item": [
+                        {
+                              "name": "Set Vault PIN",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"pin\": \"1234\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": "{{base_url}}/api/vault/pin"
+                              }
+                        },
+                        {
+                              "name": "Verify Vault PIN",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"pin\": \"1234\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": "{{base_url}}/api/vault/verify"
+                              }
+                        },
+                        {
+                              "name": "Move File to Vault",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Is Vault\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.isVault).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/vault/files/{{file_id}}/move"
+                              }
+                        },
+                        {
+                              "name": "Get Vault Items (Success)",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Items retrieved\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.files).to.be.an('array');",
+                                                      "    // Should find our file",
+                                                      "    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('file_id'));",
+                                                      "    pm.expect(file).to.exist;",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "x-vault-pin",
+                                                "value": "1234",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/vault"
+                              }
+                        },
+                        {
+                              "name": "Get Vault Items (Fail - No PIN)",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 401\", function () {",
+                                                      "    pm.response.to.have.status(401);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/vault"
+                              }
+                        },
+                        {
+                              "name": "Restore File from Vault",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Is Not Vault\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.isVault).to.eql(false);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "x-vault-pin",
+                                                "value": "1234",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/vault/files/{{file_id}}/restore"
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 11: Calendar",
+                  "item": [
+                        {
+                              "name": "Get Items by Date",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": [
+                                                      "var date = new Date();",
+                                                      "var dateString = date.toISOString().split('T')[0];",
+                                                      "pm.collectionVariables.set(\"today\", dateString);"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Items retrieved\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.files).to.be.an('array');",
+                                                      "    // Should find our file recently uploaded",
+                                                      "    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('file_id'));",
+                                                      "    pm.expect(file).to.exist;",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/calendar?date={{today}}"
+                              }
+                        }
+                  ]
             }
       ],
       "event": [

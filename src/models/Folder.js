@@ -17,6 +17,14 @@ const folderSchema = new mongoose.Schema(
                   ref: 'Folder',
                   default: null,
             },
+            isFavorite: {
+                  type: Boolean,
+                  default: false,
+            },
+            isVault: {
+                  type: Boolean,
+                  default: false,
+            },
       },
       {
             timestamps: true,

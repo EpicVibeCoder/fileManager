@@ -33,11 +33,6 @@ const fileSchema = new mongoose.Schema(
                   ref: 'Folder',
                   default: null,
             },
-            folderId: {
-                  type: mongoose.Schema.Types.ObjectId,
-                  ref: 'Folder',
-                  default: null,
-            },
             isFavorite: {
                   type: Boolean,
                   default: false,

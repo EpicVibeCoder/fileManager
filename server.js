@@ -13,6 +13,10 @@ const passport = require('./src/config/passport');
 const authRoutes = require('./src/routes/auth');
 const fileRoutes = require('./src/routes/files');
 const folderRoutes = require('./src/routes/folders');
+const favoriteRoutes = require('./src/routes/favorites');
+const dashboardRoutes = require('./src/routes/dashboard');
+const vaultRoutes = require('./src/routes/vault');
+const calendarRoutes = require('./src/routes/calendar');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -51,6 +55,10 @@ app.use(notFoundRoutes);
 app.use(authRoutes);
 app.use(fileRoutes);
 app.use(folderRoutes);
+app.use(favoriteRoutes);
+app.use(dashboardRoutes);
+app.use(vaultRoutes);
+app.use(calendarRoutes);
 
 // 404 handler
 app.use((req, res) => {

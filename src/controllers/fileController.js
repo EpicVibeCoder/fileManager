@@ -156,9 +156,199 @@ const downloadFile = async (req, res) => {
       }
 };
 
+const renameFile = async (req, res) => {
+      try {
+            const { id } = req.params;
+            const { name } = req.body;
+            const userId = req.user._id;
+
+            const file = await File.findOne({ _id: id, userId });
+            if (!file) {
+                  return sendResponse(res, 404, false, 'File not found');
+            }
+
+            // Check if file with new name already exists in same folder
+            const existingFile = await File.findOne({
+                  name: name,
+                  folderId: file.folderId,
+                  userId: userId,
+                  _id: { $ne: id },
+            });
+
+            if (existingFile) {
+                  return sendResponse(res, 400, false, 'File with this name already exists in this folder');
+            }
+
+            file.name = name;
+            await file.save();
+
+            return sendResponse(res, 200, true, 'File renamed successfully', file);
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error renaming file', null, { details: error.message });
+      }
+};
+
+const deleteFile = async (req, res) => {
+      try {
+            const { id } = req.params;
+            const userId = req.user._id;
+
+            const file = await File.findOne({ _id: id, userId });
+            if (!file) {
+                  return sendResponse(res, 404, false, 'File not found');
+            }
+
+            // Remove physical file
+            if (fs.existsSync(file.path)) {
+                  fs.unlinkSync(file.path);
+            }
+
+            // Remove from DB
+            await File.deleteOne({ _id: id });
+
+            // Update storage
+            await updateStorageUsage(userId, file.size, 'remove');
+
+            return sendResponse(res, 200, true, 'File deleted successfully');
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error deleting file', null, { details: error.message });
+      }
+};
+
+const duplicateFile = async (req, res) => {
+      try {
+            const { id } = req.params;
+            const userId = req.user._id;
+
+            const file = await File.findOne({ _id: id, userId });
+            if (!file) {
+                  return sendResponse(res, 404, false, 'File not found');
+            }
+
+            // Validate storage limit for duplication
+            const hasSpace = await checkStorageLimit(userId, file.size);
+            if (!hasSpace) {
+                  return sendResponse(res, 400, false, 'Storage limit exceeded');
+            }
+
+            // Generate unique name
+            const ext = path.extname(file.name);
+            const baseName = path.basename(file.name, ext);
+            let newName = `${baseName}_copy${ext}`;
+            let counter = 1;
+
+            while (await File.findOne({ name: newName, folderId: file.folderId, userId })) {
+                  newName = `${baseName}_copy (${counter})${ext}`;
+                  counter++;
+            }
+
+            // Generate new physical path
+            const newSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const dir = path.dirname(file.path);
+            const newPath = path.join(dir, newSuffix + '-' + newName);
+
+            // Copy physical file
+            if (fs.existsSync(file.path)) {
+                  fs.copyFileSync(file.path, newPath);
+            } else {
+                  return sendResponse(res, 404, false, 'Source file not found on server');
+            }
+
+            const newFile = new File({
+                  name: newName,
+                  type: file.type,
+                  size: file.size,
+                  path: newPath,
+                  mimeType: file.mimeType,
+                  userId: userId,
+                  folderId: file.folderId,
+            });
+
+            await newFile.save();
+            await updateStorageUsage(userId, file.size, 'add');
+
+            return sendResponse(res, 201, true, 'File duplicated successfully', newFile);
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error duplicating file', null, { details: error.message });
+      }
+};
+
+const copyFile = async (req, res) => {
+      try {
+            const { id } = req.params;
+            const { folderId } = req.body; // Target folder
+            const userId = req.user._id;
+
+            const file = await File.findOne({ _id: id, userId });
+            if (!file) {
+                  return sendResponse(res, 404, false, 'File not found');
+            }
+
+            // Validate target folder if provided
+            if (folderId) {
+                  const folder = await Folder.findOne({ _id: folderId, userId });
+                  if (!folder) {
+                        return sendResponse(res, 404, false, 'Target folder not found');
+                  }
+            }
+
+            // Validate storage limit for copy
+            const hasSpace = await checkStorageLimit(userId, file.size);
+            if (!hasSpace) {
+                  return sendResponse(res, 400, false, 'Storage limit exceeded');
+            }
+
+            // Check name uniqueness in target folder
+            let newName = file.name;
+            const ext = path.extname(file.name);
+            const baseName = path.basename(file.name, ext);
+            let counter = 1;
+
+            while (await File.findOne({ name: newName, folderId: folderId || null, userId })) {
+                  newName = `${baseName} (${counter})${ext}`;
+                  counter++;
+            }
+
+            // Generate new physical path
+            const newSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            // We can store it in same physical directory as original type-based structure,
+            // no matter the folderId.
+            const dir = path.dirname(file.path);
+            const newPath = path.join(dir, newSuffix + '-' + newName);
+
+            // Copy physical file
+            if (fs.existsSync(file.path)) {
+                  fs.copyFileSync(file.path, newPath);
+            } else {
+                  return sendResponse(res, 404, false, 'Source file not found on server');
+            }
+
+            const newFile = new File({
+                  name: newName,
+                  type: file.type,
+                  size: file.size,
+                  path: newPath,
+                  mimeType: file.mimeType,
+                  userId: userId,
+                  folderId: folderId || null,
+            });
+
+            await newFile.save();
+            await updateStorageUsage(userId, file.size, 'add');
+
+            return sendResponse(res, 201, true, 'File copied successfully', newFile);
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error copying file', null, { details: error.message });
+      }
+};
+
 module.exports = {
       uploadFile,
       getFiles,
       getFileDetails,
       downloadFile,
+      renameFile,
+      deleteFile,
+      duplicateFile,
+      copyFile,
 };
