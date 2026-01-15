@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const sendResponse = require('../utils/response');
+const passport = require('passport');
 
 const signup = async (req, res) => {
       try {
@@ -161,10 +162,13 @@ const forgotPassword = async (req, res) => {
             // In production, send email with reset token
             // For now, return token in response (remove in production!)
             if (process.env.NODE_ENV === 'development') {
-            return sendResponse(res, 200, true, 'Password reset token generated', {
-                  resetToken, // Remove this in production - send via email instead
-                  expiresIn: '10 minutes',
-            })};
+                  return sendResponse(res, 200, true, 'Password reset token generated', {
+                        resetToken, // Remove this in production - send via email instead
+                        expiresIn: '10 minutes',
+                  });
+            }
+            // Production: don't return token
+            return sendResponse(res, 200, true, 'If the email exists, a password reset link has been sent', null);
       } catch (error) {
             return sendResponse(res, 500, false, 'Error processing password reset request', null, { details: error.message });
       }
@@ -195,6 +199,37 @@ const resetPassword = async (req, res) => {
       }
 };
 
+const googleAuth = passport.authenticate('google', {
+      scope: ['profile', 'email'],
+});
+
+const googleCallback = async (req, res) => {
+      try {
+            // User is attached to req.user by passport after successful authentication
+            const user = req.user;
+
+            if (!user) {
+                  return sendResponse(res, 401, false, 'Google authentication failed', null);
+            }
+
+            // Generate JWT token (already imported at top)
+            const token = generateToken({ id: user._id, email: user.email });
+
+            // Redirect to frontend with token (or return JSON for API)
+            if (process.env.FRONTEND_URL) {
+                  return res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+            }
+
+            // Return JSON response for API testing
+            return sendResponse(res, 200, true, 'Google authentication successful', {
+                  user: user.toJSON(),
+                  token,
+            });
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error during Google authentication', null, { details: error.message });
+      }
+};
+
 module.exports = {
       signup,
       login,
@@ -203,4 +238,6 @@ module.exports = {
       changePassword,
       forgotPassword,
       resetPassword,
+      googleAuth,
+      googleCallback,
 };

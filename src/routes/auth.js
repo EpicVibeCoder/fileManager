@@ -59,12 +59,7 @@ const resetPasswordValidation = [
       body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters long'),
 ];
 
-// Routes
-router.post('/api/auth/signup', ...signupValidation, handleValidationErrors, authController.signup);
 
-router.post('/api/auth/login', ...loginValidation, handleValidationErrors, authController.login);
-
-router.post('/api/auth/logout', authController.logout);
 
 // Protected routes (require authentication)
 router.put(
@@ -93,5 +88,19 @@ router.post('/api/auth/signup', ...signupValidation, handleValidationErrors, aut
 router.post('/api/auth/login', ...loginValidation, handleValidationErrors, authController.login);
 
 router.post('/api/auth/logout', authController.logout);
+
+// Google OAuth routes
+router.get('/api/auth/google', authController.googleAuth);
+
+router.get(
+  '/api/auth/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: '/api/auth/google/failure' }),
+  authController.googleCallback
+);
+
+router.get('/api/auth/google/failure', (req, res) => {
+  return sendResponse(res, 401, false, 'Google authentication failed', null);
+});
+
 
 module.exports = router;

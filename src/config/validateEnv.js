@@ -45,45 +45,45 @@ const validateEnv = () => {
     }
   });
 
-  // // Validate Google OAuth variables (if any are set, all must be set and valid)
-  // const googleVarsSet = googleOAuthVars.filter(
-  //   (varName) => process.env[varName] && process.env[varName].trim() !== ''
-  // );
+  // Validate Google OAuth variables (if any are set, all must be set and valid)
+  const googleVarsSet = googleOAuthVars.filter(
+    (varName) => process.env[varName] && process.env[varName].trim() !== ''
+  );
 
-  // if (googleVarsSet.length > 0 && googleVarsSet.length < googleOAuthVars.length) {
-  //   const missingGoogleVars = googleOAuthVars.filter(
-  //     (varName) => !process.env[varName] || process.env[varName].trim() === ''
-  //   );
-  //   console.error('\n❌ Google OAuth configuration incomplete:');
-  //   console.error('   If you set any Google OAuth variable, all must be set:');
-  //   missingGoogleVars.forEach((varName) => {
-  //     console.error(`   - Missing: ${varName}`);
-  //   });
-  //   console.error('\n⚠️  Please set all Google OAuth variables or remove them all');
-  //   console.error('   These are required for Phase 4 (Google OAuth)\n');
-  //   process.exit(1);
-  // }
+  if (googleVarsSet.length > 0 && googleVarsSet.length < googleOAuthVars.length) {
+    const missingGoogleVars = googleOAuthVars.filter(
+      (varName) => !process.env[varName] || process.env[varName].trim() === ''
+    );
+    console.error('\n❌ Google OAuth configuration incomplete:');
+    console.error('   If you set any Google OAuth variable, all must be set:');
+    missingGoogleVars.forEach((varName) => {
+      console.error(`   - Missing: ${varName}`);
+    });
+    console.error('\n⚠️  Please set all Google OAuth variables or remove them all');
+    console.error('   These are required for Phase 4 (Google OAuth)\n');
+    process.exit(1);
+  }
 
-  // // Check for Google OAuth placeholder values
-  // if (googleVarsSet.length > 0) {
-  //   googleOAuthVars.forEach((varName) => {
-  //     const value = process.env[varName];
-  //     if (value) {
-  //       if (varName === 'GOOGLE_CLIENT_ID' && value === 'your-google-client-id') {
-  //         invalidValues.push({
-  //           name: varName,
-  //           message: 'GOOGLE_CLIENT_ID must be changed from the default placeholder value',
-  //         });
-  //       }
-  //       if (varName === 'GOOGLE_CLIENT_SECRET' && value === 'your-google-client-secret') {
-  //         invalidValues.push({
-  //           name: varName,
-  //           message: 'GOOGLE_CLIENT_SECRET must be changed from the default placeholder value',
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
+  // Check for Google OAuth placeholder values
+  if (googleVarsSet.length > 0) {
+    googleOAuthVars.forEach((varName) => {
+      const value = process.env[varName];
+      if (value) {
+        if (varName === 'GOOGLE_CLIENT_ID' && value === 'your-google-client-id') {
+          invalidValues.push({
+            name: varName,
+            message: 'GOOGLE_CLIENT_ID must be changed from the default placeholder value',
+          });
+        }
+        if (varName === 'GOOGLE_CLIENT_SECRET' && value === 'your-google-client-secret') {
+          invalidValues.push({
+            name: varName,
+            message: 'GOOGLE_CLIENT_SECRET must be changed from the default placeholder value',
+          });
+        }
+      }
+    });
+  }
 
   // Exit if required variables are missing
   if (missingRequired.length > 0) {
