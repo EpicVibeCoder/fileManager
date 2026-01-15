@@ -1,43 +1,53 @@
-const User = require('../models/User');
-const { generateToken } = require('../utils/jwt');
+const RefreshToken = require('../models/RefreshToken');
+const { generateToken, generateRefreshToken } = require('../utils/jwt');
 const sendResponse = require('../utils/response');
 const passport = require('passport');
+
+// Helper to set refresh token in cookie (optional) or just return in body
+const setTokenCookie = (res, token) => {
+      // Phase requirements don't strictly specify cookies, so we'll return in body.
+      // If we wanted cookies:
+      // const cookieOptions = {
+      //     httpOnly: true,
+      //     expires: new Date(Date.now() + 7*24*60*60*1000)
+      // };
+      // res.cookie('refreshToken', token, cookieOptions);
+};
 
 const signup = async (req, res) => {
       try {
             const { email, password, confirmPassword, agreementAccepted } = req.body;
 
-            // Check if agreement is accepted
             if (!agreementAccepted) {
                   return sendResponse(res, 400, false, 'You must accept the agreement to sign up', null, { field: 'agreementAccepted' });
             }
-
-            // Check if passwords match
             if (password !== confirmPassword) {
                   return sendResponse(res, 400, false, 'Passwords do not match', null, { field: 'confirmPassword' });
             }
 
-            // Check if user already exists
             const existingUser = await User.findOne({ email });
             if (existingUser) {
                   return sendResponse(res, 409, false, 'User with this email already exists', null, { field: 'email' });
             }
 
-            // Create new user
-            const user = new User({
-                  email,
-                  password,
-                  agreementAccepted,
-            });
-
+            const user = new User({ email, password, agreementAccepted });
             await user.save();
 
-            // Generate JWT token
-            const token = generateToken({ id: user._id, email: user.email });
+            const accessToken = generateToken({ id: user._id, email: user.email });
+            const refreshToken = generateRefreshToken();
+
+            // Save refresh token
+            await new RefreshToken({
+                  user: user._id,
+                  token: refreshToken.token,
+                  expires: refreshToken.expires,
+                  createdByIp: req.ip,
+            }).save();
 
             return sendResponse(res, 201, true, 'User registered successfully', {
                   user: user.toJSON(),
-                  token,
+                  accessToken,
+                  refreshToken: refreshToken.token,
             });
       } catch (error) {
             return sendResponse(res, 500, false, 'Error during signup', null, { details: error.message });
@@ -48,41 +58,117 @@ const login = async (req, res) => {
       try {
             const { email, password } = req.body;
 
-            // Find user by email
             const user = await User.findOne({ email });
-            if (!user) {
+            if (!user || !user.password) {
                   return sendResponse(res, 401, false, 'Invalid email or password', null);
             }
 
-            // Check if user has a password (Google OAuth users might not)
-            if (!user.password) {
-                  return sendResponse(res, 401, false, 'Invalid email or password', null);
-            }
-
-            // Compare password
             const isPasswordValid = await user.comparePassword(password);
             if (!isPasswordValid) {
                   return sendResponse(res, 401, false, 'Invalid email or password', null);
             }
 
-            // Generate JWT token
-            const token = generateToken({ id: user._id, email: user.email });
+            const accessToken = generateToken({ id: user._id, email: user.email });
+            const refreshToken = generateRefreshToken();
+
+            await new RefreshToken({
+                  user: user._id,
+                  token: refreshToken.token,
+                  expires: refreshToken.expires,
+                  createdByIp: req.ip,
+            }).save();
 
             return sendResponse(res, 200, true, 'Login successful', {
                   user: user.toJSON(),
-                  token,
+                  accessToken,
+                  refreshToken: refreshToken.token,
             });
       } catch (error) {
             return sendResponse(res, 500, false, 'Error during login', null, { details: error.message });
       }
 };
 
+const refreshToken = async (req, res) => {
+      try {
+            const { refreshToken } = req.body;
+            if (!refreshToken) {
+                  return sendResponse(res, 400, false, 'Token is required');
+            }
+
+            const tokenDoc = await RefreshToken.findOne({ token: refreshToken });
+
+            if (!tokenDoc) {
+                  return sendResponse(res, 400, false, 'Invalid token');
+            }
+
+            // Token Reuse Detection (Rotation Strategy)
+            if (tokenDoc.revoked) {
+                  // If a revoked token is used, it might be a theft. Revoke all descendant tokens.
+                  // For now, simpler implementation: revoke all tokens for this user (force re-login).
+                  // This is "family" revocation.
+                  await RefreshToken.updateMany({ user: tokenDoc.user }, { revoked: Date.now(), revokedByIp: req.ip });
+                  return sendResponse(res, 400, false, 'Invalid token (reuse detected)');
+            }
+
+            if (tokenDoc.isExpired) {
+                  // Cleanup if needed, or rely on TTL
+                  return sendResponse(res, 400, false, 'Token expired');
+            }
+
+            const user = await User.findById(tokenDoc.user);
+            if (!user) {
+                  return sendResponse(res, 404, false, 'User not found');
+            }
+
+            // Generate new pair
+            const newAccessToken = generateToken({ id: user._id, email: user.email });
+            const newRefreshToken = generateRefreshToken();
+
+            // Rotate: Revoke old token, Replacing with new one
+            tokenDoc.revoked = Date.now();
+            tokenDoc.revokedByIp = req.ip;
+            tokenDoc.replacedByToken = newRefreshToken.token;
+            await tokenDoc.save();
+
+            // Save new token
+            await new RefreshToken({
+                  user: user._id,
+                  token: newRefreshToken.token,
+                  expires: newRefreshToken.expires,
+                  createdByIp: req.ip,
+            }).save();
+
+            return sendResponse(res, 200, true, 'Token refreshed', {
+                  accessToken: newAccessToken,
+                  refreshToken: newRefreshToken.token,
+            });
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error refreshing token', null, { details: error.message });
+      }
+};
+
+const revokeToken = async (req, res) => {
+      try {
+            // Can accept token in body or use current user context if auth required
+            // Implementation for manual revocation (optional)
+            const { token } = req.body;
+            if (!token) return sendResponse(res, 400, false, 'Token required');
+
+            await RefreshToken.findOneAndUpdate({ token }, { revoked: Date.now(), revokedByIp: req.ip });
+            return sendResponse(res, 200, true, 'Token revoked');
+      } catch (err) {
+            return sendResponse(res, 500, false, 'Error revoking token');
+      }
+};
+
 const logout = async (req, res) => {
       try {
-            // Since we're using stateless JWT, logout is handled client-side
-            // by removing the token. For server-side logout, you'd need to maintain
-            // a token blacklist, which is beyond Phase 2 scope.
-            return sendResponse(res, 200, true, 'Logout successful. Please remove the token from client storage.', null);
+            // Revoke the refresh token provided by client
+            const { refreshToken } = req.body;
+            if (refreshToken) {
+                  await RefreshToken.findOneAndUpdate({ token: refreshToken }, { revoked: Date.now(), revokedByIp: req.ip });
+            }
+            return sendResponse(res, 200, true, 'Logout successful', null);
       } catch (error) {
             return sendResponse(res, 500, false, 'Error during logout', null, { details: error.message });
       }
@@ -213,17 +299,30 @@ const googleCallback = async (req, res) => {
             }
 
             // Generate JWT token (already imported at top)
-            const token = generateToken({ id: user._id, email: user.email });
+            const accessToken = generateToken({ id: user._id, email: user.email });
+            const refreshToken = generateRefreshToken();
+
+            // Save refresh token
+            await new RefreshToken({
+                  user: user._id,
+                  token: refreshToken.token,
+                  expires: refreshToken.expires,
+                  createdByIp: req.ip,
+            }).save();
 
             // Redirect to frontend with token (or return JSON for API)
+            // Note: Returning refresh token in URL is risky. Usually set as cookie or return in JSON body via POST.
+            // Since this is a callback, we usually redirect to a client page which then exchanges a temporary code or receives tokens securely.
+            // For this API:
             if (process.env.FRONTEND_URL) {
-                  return res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+                  return res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${accessToken}&refreshToken=${refreshToken.token}`);
             }
 
             // Return JSON response for API testing
             return sendResponse(res, 200, true, 'Google authentication successful', {
                   user: user.toJSON(),
-                  token,
+                  accessToken,
+                  refreshToken: refreshToken.token,
             });
       } catch (error) {
             return sendResponse(res, 500, false, 'Error during Google authentication', null, { details: error.message });
@@ -234,6 +333,7 @@ module.exports = {
       signup,
       login,
       logout,
+      refreshToken,
       editProfile,
       changePassword,
       forgotPassword,

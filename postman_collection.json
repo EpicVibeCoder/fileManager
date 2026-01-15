@@ -188,10 +188,13 @@
                                                       "",
                                                       "pm.test(\"Token received\", function () {",
                                                       "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data).to.have.property('token');",
+                                                      "    pm.expect(jsonData.data).to.have.property('accessToken');",
+                                                      "    pm.expect(jsonData.data).to.have.property('refreshToken');",
                                                       "    pm.expect(jsonData.data.user).to.have.property('email');",
-                                                      "    // Store email for login test",
+                                                      "    // Store for future tests",
                                                       "    pm.collectionVariables.set(\"test_email\", jsonData.data.user.email);",
+                                                      "    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
+                                                      "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -324,8 +327,10 @@
                                                       "",
                                                       "pm.test(\"Token returned\", function () {",
                                                       "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data).to.have.property('token');",
-                                                      "    pm.collectionVariables.set(\"auth_token\", jsonData.data.token);",
+                                                      "    pm.expect(jsonData.data).to.have.property('accessToken');",
+                                                      "    pm.expect(jsonData.data).to.have.property('refreshToken');",
+                                                      "    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
+                                                      "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -418,12 +423,21 @@
                               "request": {
                                     "method": "POST",
                                     "header": [],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
                                     "url": {
                                           "raw": "{{base_url}}/api/auth/logout",
                                           "host": ["{{base_url}}"],
                                           "path": ["api", "auth", "logout"]
                                     },
-                                    "description": "Logout user"
+                                    "description": "Logout user and revoke refresh token"
                               },
                               "response": []
                         }
@@ -1799,6 +1813,79 @@
                                           }
                                     ],
                                     "url": "{{base_url}}/api/calendar?date={{today}}"
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 13: Token Rotation",
+                  "item": [
+                        {
+                              "name": "Refresh Token",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"New tokens received\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data).to.have.property('accessToken');",
+                                                      "    pm.expect(jsonData.data).to.have.property('refreshToken');",
+                                                      "    // Update vars with new tokens",
+                                                      "    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
+                                                      "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": "{{base_url}}/api/auth/refresh-token"
+                              }
+                        },
+                        {
+                              "name": "Revoke Token",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"token\": \"{{refresh_token}}\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": "{{base_url}}/api/auth/revoke-token"
                               }
                         }
                   ]
