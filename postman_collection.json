@@ -2,7 +2,7 @@
       "info": {
             "_postman_id": "phase1-storage-management-api",
             "name": "Storage Management API",
-            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- List Images\n- List PDFs\n- List Docs\n- Get File Details\n- Download File",
+            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- List Images\n- List PDFs\n- List Docs\n- Get File Details\n- Download File\n\n**Phase 6 Endpoints:**\n- Create Folder\n- List Folders\n- Create Subfolder\n- Upload File to Folder\n- Get Folder Contents\n- Rename Folder\n- Delete Folder",
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
       },
       "item": [
@@ -993,6 +993,326 @@
                                           "path": ["api", "files", "{{file_id}}", "download"]
                                     },
                                     "description": "Download a specific file."
+                              },
+                              "response": []
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 6: Folder Management",
+                  "item": [
+                        {
+                              "name": "Create Folder",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Folder created\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data).to.have.property('name', 'Docs');",
+                                                      "    pm.collectionVariables.set(\"folder_id\", jsonData.data._id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"name\": \"Docs\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": {
+                                          "raw": "{{base_url}}/api/folders",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "folders"]
+                                    },
+                                    "description": "Create a new folder."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "List Folders",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Folders listed\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data).to.be.an('array');",
+                                                      "    // Verify our new folder is there",
+                                                      "    const folder = jsonData.data.find(f => f._id === pm.collectionVariables.get('folder_id'));",
+                                                      "    pm.expect(folder).to.exist;",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/folders",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "folders"]
+                                    },
+                                    "description": "List root folders."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Create Subfolder",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Subfolder created\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.data.parentId).to.eql(pm.collectionVariables.get('folder_id'));",
+                                                      "    pm.collectionVariables.set(\"subfolder_id\", jsonData.data._id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"name\": \"Nest\",\n    \"parentId\": \"{{folder_id}}\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": {
+                                          "raw": "{{base_url}}/api/folders",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "folders"]
+                                    },
+                                    "description": "Create a subfolder inside the 'Docs' folder."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Upload File to Folder",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"File uploaded to folder\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data.folderId).to.eql(pm.collectionVariables.get('folder_id'));",
+                                                      "    pm.collectionVariables.set(\"folder_file_id\", jsonData.data._id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "formdata",
+                                          "formdata": [
+                                                {
+                                                      "key": "file",
+                                                      "type": "file",
+                                                      "src": []
+                                                },
+                                                {
+                                                      "key": "folderId",
+                                                      "value": "{{folder_id}}",
+                                                      "type": "text"
+                                                }
+                                          ]
+                                    },
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/upload",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "upload"]
+                                    },
+                                    "description": "Upload a file into the 'Docs' folder."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Get Folder Contents",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Contents retrieved\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    // Should find our subfolder 'Nest'",
+                                                      "    const sub = jsonData.data.subfolders.find(f => f._id === pm.collectionVariables.get('subfolder_id'));",
+                                                      "    pm.expect(sub).to.exist;",
+                                                      "    // Should find our uploaded file",
+                                                      "    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('folder_file_id'));",
+                                                      "    pm.expect(file).to.exist;",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/folders/{{folder_id}}/files",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "folders", "{{folder_id}}", "files"]
+                                    },
+                                    "description": "List files and subfolders within 'Docs'."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Rename Folder",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Folder renamed\", function () {",
+                                                      "    pm.expect(pm.response.json().data.name).to.eql(\"Documents\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PUT",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n    \"name\": \"Documents\"\n}",
+                                          "options": {
+                                                "raw": {
+                                                      "language": "json"
+                                                }
+                                          }
+                                    },
+                                    "url": {
+                                          "raw": "{{base_url}}/api/folders/{{folder_id}}/rename",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "folders", "{{folder_id}}", "rename"]
+                                    },
+                                    "description": "Rename 'Docs' to 'Documents'."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Delete Folder",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/folders/{{folder_id}}",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "folders", "{{folder_id}}"]
+                                    },
+                                    "description": "Delete 'Documents' folder. This should recursively delete the subfolder and the file inside it."
                               },
                               "response": []
                         }
