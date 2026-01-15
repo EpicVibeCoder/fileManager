@@ -2,7 +2,7 @@
       "info": {
             "_postman_id": "phase1-storage-management-api",
             "name": "Storage Management API",
-            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- Get File Details\n- Download File",
+            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- List Images\n- List PDFs\n- List Docs\n- Get File Details\n- Download File",
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
       },
       "item": [
@@ -427,8 +427,7 @@
                               },
                               "response": []
                         }
-                  ],
-                  "description": "Phase 2: User Authentication endpoints"
+                  ]
             },
             {
                   "name": "Phase 3: User Profile Management",
@@ -786,6 +785,141 @@
                                           "path": ["api", "files"]
                                     },
                                     "description": "List all uploaded files."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "List Images",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Files retrieved successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data).to.be.an('array');",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files?type=image",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files"],
+                                          "query": [
+                                                {
+                                                      "key": "type",
+                                                      "value": "image"
+                                                }
+                                          ]
+                                    },
+                                    "description": "List all uploaded image files."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "List PDFs",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Files retrieved successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data).to.be.an('array');",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files?type=pdf",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files"],
+                                          "query": [
+                                                {
+                                                      "key": "type",
+                                                      "value": "pdf"
+                                                }
+                                          ]
+                                    },
+                                    "description": "List all uploaded PDF files."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "List Docs",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Files retrieved successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data).to.be.an('array');",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files?type=doc",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files"],
+                                          "query": [
+                                                {
+                                                      "key": "type",
+                                                      "value": "doc"
+                                                }
+                                          ]
+                                    },
+                                    "description": "List all uploaded document files."
                               },
                               "response": []
                         },

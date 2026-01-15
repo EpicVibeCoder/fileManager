@@ -13,6 +13,23 @@ const uploadFile = async (req, res) => {
             const { size, path: filePath, mimetype, originalname } = req.file;
             const userId = req.user._id;
 
+            // Determine type
+            let type = 'doc';
+            if (mimetype.startsWith('image/')) type = 'image';
+            else if (mimetype === 'application/pdf') type = 'pdf';
+
+            // Check if file with same name and type exists
+            const existingFile = await File.findOne({
+                  name: originalname,
+                  type: type,
+                  userId: userId,
+            });
+
+            if (existingFile) {
+                  fs.unlinkSync(filePath);
+                  return sendResponse(res, 400, false, 'File with the same name and type already exists');
+            }
+
             // Check storage limit
             const hasSpace = await checkStorageLimit(userId, size);
             if (!hasSpace) {
@@ -20,11 +37,6 @@ const uploadFile = async (req, res) => {
                   fs.unlinkSync(filePath);
                   return sendResponse(res, 400, false, 'Storage limit exceeded');
             }
-
-            // Determine type
-            let type = 'doc';
-            if (mimetype.startsWith('image/')) type = 'image';
-            else if (mimetype === 'application/pdf') type = 'pdf';
 
             const file = new File({
                   name: originalname,
@@ -51,7 +63,12 @@ const uploadFile = async (req, res) => {
 const getFiles = async (req, res) => {
       try {
             const { type, folderId } = req.query;
-            const query = { userId: req.user._id };
+            const query = {};
+
+            // If not admin, restrict to own files
+            if (req.user.role !== 'admin') {
+                  query.userId = req.user._id;
+            }
 
             if (type) query.type = type;
             if (folderId) query.folderId = folderId;
@@ -66,7 +83,14 @@ const getFiles = async (req, res) => {
 
 const getFileDetails = async (req, res) => {
       try {
-            const file = await File.findOne({ _id: req.params.id, userId: req.user._id });
+            const query = { _id: req.params.id };
+
+            // If not admin, restrict to own files
+            if (req.user.role !== 'admin') {
+                  query.userId = req.user._id;
+            }
+
+            const file = await File.findOne(query);
             if (!file) {
                   return sendResponse(res, 404, false, 'File not found');
             }
@@ -79,7 +103,14 @@ const getFileDetails = async (req, res) => {
 
 const downloadFile = async (req, res) => {
       try {
-            const file = await File.findOne({ _id: req.params.id, userId: req.user._id });
+            const query = { _id: req.params.id };
+
+            // If not admin, restrict to own files
+            if (req.user.role !== 'admin') {
+                  query.userId = req.user._id;
+            }
+
+            const file = await File.findOne(query);
             if (!file) {
                   return sendResponse(res, 404, false, 'File not found');
             }
