@@ -2,7 +2,7 @@
       "info": {
             "_postman_id": "phase1-storage-management-api",
             "name": "Storage Management API",
-            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback",
+            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- Get File Details\n- Download File",
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
       },
       "item": [
@@ -692,6 +692,173 @@
                                           ]
                                     },
                                     "description": "Callback URL for Google. Phase 4 completion requires pasting the code from the browser redirect here manually."
+                              },
+                              "response": []
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 5: File Management",
+                  "item": [
+                        {
+                              "name": "Upload File",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"File uploaded successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data).to.have.property('_id');",
+                                                      "    pm.collectionVariables.set(\"file_id\", jsonData.data._id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "formdata",
+                                          "formdata": [
+                                                {
+                                                      "key": "file",
+                                                      "type": "file",
+                                                      "src": []
+                                                }
+                                          ]
+                                    },
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/upload",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "upload"]
+                                    },
+                                    "description": "Upload a file (select a file in the Body -> form-data tab)."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "List Files",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"Files retrieved successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data).to.be.an('array');",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files"]
+                                    },
+                                    "description": "List all uploaded files."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Get File Details",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "",
+                                                      "pm.test(\"File details retrieved\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.success).to.eql(true);",
+                                                      "    pm.expect(jsonData.data).to.have.property('_id');",
+                                                      "    pm.expect(jsonData.data._id).to.eql(pm.collectionVariables.get(\"file_id\"));",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/{{file_id}}",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "{{file_id}}"]
+                                    },
+                                    "description": "Get details of a specific file."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Download File",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/{{file_id}}/download",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "{{file_id}}", "download"]
+                                    },
+                                    "description": "Download a specific file."
                               },
                               "response": []
                         }
