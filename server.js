@@ -11,7 +11,7 @@ const healthRoutes = require('./src/routes/health');
 const notFoundRoutes = require('./src/routes/notFound');
 const passport = require('./src/config/passport');
 const authRoutes = require('./src/routes/auth');
-
+const fileRoutes = require('./src/routes/files');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -48,6 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(healthRoutes);
 app.use(notFoundRoutes);
 app.use(authRoutes);
+app.use(fileRoutes);
 
 // 404 handler
 app.use((req, res) => {
