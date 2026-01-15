@@ -2,7 +2,7 @@
       "info": {
             "_postman_id": "phase1-storage-management-api",
             "name": "Storage Management API",
-            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password",
+            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback",
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
       },
       "item": [
@@ -512,7 +512,7 @@
                                     ],
                                     "body": {
                                           "mode": "raw",
-                                          "raw": "{\n    \"oldPassword\": \"password123\",\n    \"newPassword\": \"newpassword123\",\n    \"confirmNewPassword\": \"newpassword123\"\n}",
+                                          "raw": "{\n    \"oldPassword\": \"password123\",\n    \"newPassword\": \"newpassword123\"\n}",
                                           "options": {
                                                 "raw": {
                                                       "language": "json"
@@ -602,7 +602,7 @@
                                     "header": [],
                                     "body": {
                                           "mode": "raw",
-                                          "raw": "{\n    \"token\": \"{{reset_token}}\",\n    \"newPassword\": \"password123\",\n    \"confirmNewPassword\": \"password123\"\n}",
+                                          "raw": "{\n    \"token\": \"{{reset_token}}\",\n    \"newPassword\": \"password123\"\n}",
                                           "options": {
                                                 "raw": {
                                                       "language": "json"
@@ -615,6 +615,83 @@
                                           "path": ["api", "auth", "reset-password"]
                                     },
                                     "description": "Reset password using the token."
+                              },
+                              "response": []
+                        }
+                  ]
+            },
+            {
+                  "name": "Phase 4: Google OAuth",
+                  "item": [
+                        {
+                              "name": "Initiate Google OAuth",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "// This request redirects to Google. Postman might follow the redirect.",
+                                                      "// If 'Automatically follow redirects' is OFF, you get 302.",
+                                                      "// If ON, you get 200 (the Google login page).",
+                                                      "",
+                                                      "pm.test(\"Status code is 200 or 302\", function () {",
+                                                      "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/auth/google",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "auth", "google"]
+                                    },
+                                    "description": "Initiates the Google OAuth flow. This will redirect to Google's login page."
+                              },
+                              "response": []
+                        },
+                        {
+                              "name": "Google OAuth Callback",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code check\", function () {",
+                                                      "    // Fails (401 or similar) if no code is provided, or 200 if valid code provided manually",
+                                                      "    // This test expects failure for the template request",
+                                                      "    if (pm.request.url.query.has(\"code\")) {",
+                                                      "        pm.response.to.have.status(200);",
+                                                      "    } else {",
+                                                      "        // Expect failure or error message if code is missing",
+                                                      "        pm.expect(pm.response.code).to.be.oneOf([400, 401, 500]);",
+                                                      "    }",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{base_url}}/api/auth/google/callback?code=PASTE_CODE_HERE",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "auth", "google", "callback"],
+                                          "query": [
+                                                {
+                                                      "key": "code",
+                                                      "value": "PASTE_CODE_HERE",
+                                                      "description": "The Authorization Code returned by Google"
+                                                }
+                                          ]
+                                    },
+                                    "description": "Callback URL for Google. Phase 4 completion requires pasting the code from the browser redirect here manually."
                               },
                               "response": []
                         }
