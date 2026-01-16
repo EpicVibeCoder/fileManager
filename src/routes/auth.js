@@ -53,6 +53,12 @@ const changePasswordValidation = [
 // Forgot password validation rules
 const forgotPasswordValidation = [body('email').isEmail().withMessage('Please provide a valid email').normalizeEmail()];
 
+// Verify OTP validation rules
+const verifyOtpValidation = [
+      body('email').isEmail().withMessage('Please provide a valid email').normalizeEmail(),
+      body('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits'),
+];
+
 // Reset password validation rules
 const resetPasswordValidation = [
       body('token').notEmpty().withMessage('Reset token is required'),
@@ -79,7 +85,10 @@ router.post(
 // Public routes
 router.post('/api/auth/forgot-password', ...forgotPasswordValidation, handleValidationErrors, authController.forgotPassword);
 
+router.post('/api/auth/verify-otp', ...verifyOtpValidation, handleValidationErrors, authController.verifyOtp);
+
 router.post('/api/auth/reset-password', ...resetPasswordValidation, handleValidationErrors, authController.resetPassword);
+
 // Routes
 router.post('/api/auth/signup', ...signupValidation, handleValidationErrors, authController.signup);
 

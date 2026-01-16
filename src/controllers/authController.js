@@ -3,6 +3,7 @@ const User = require('../models/User');
 const { generateToken, generateRefreshToken } = require('../utils/jwt');
 const sendResponse = require('../utils/response');
 const passport = require('passport');
+const { sendOtpEmail } = require('../services/emailService');
 
 // Helper to set refresh token in cookie (optional) or just return in body
 const setTokenCookie = (res, token) => {
@@ -245,30 +246,79 @@ const forgotPassword = async (req, res) => {
             const user = await User.findOne({ email });
             if (!user) {
                   // Don't reveal if email exists for security
-                  return sendResponse(res, 200, true, 'If the email exists, a password reset link has been sent', null);
+                  return sendResponse(res, 200, true, 'If the email exists, an OTP has been sent to your email', null);
             }
 
-            // Generate reset token
-            const crypto = require('crypto');
-            const resetToken = crypto.randomBytes(32).toString('hex');
+            // Generate 6-digit OTP
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
             const resetTokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-            user.resetPasswordToken = resetToken;
+            user.resetPasswordToken = otp;
             user.resetPasswordExpires = new Date(resetTokenExpiry);
             await user.save();
 
-            // In production, send email with reset token
-            // For now, return token in response (remove in production!)
-            if (process.env.NODE_ENV === 'development') {
-                  return sendResponse(res, 200, true, 'Password reset token generated', {
-                        resetToken, // Remove this in production - send via email instead
-                        expiresIn: '10 minutes',
-                  });
+            // Send OTP via email
+            try {
+                  await sendOtpEmail(email, otp);
+
+                  // In development, also return OTP in response for testing
+                  if (process.env.NODE_ENV === 'development') {
+                        return sendResponse(res, 200, true, 'OTP sent to email', {
+                              otp, // Only in development
+                              expiresIn: '10 minutes',
+                        });
+                  }
+
+                  return sendResponse(res, 200, true, 'OTP has been sent to your email', null);
+            } catch (emailError) {
+                  // If email fails, still return success (security best practice)
+                  // But log the error
+                  console.error('Failed to send OTP email:', emailError);
+
+                  if (process.env.NODE_ENV === 'development') {
+                        return sendResponse(res, 200, true, 'OTP generated (email failed)', {
+                              otp, // Return OTP in dev if email fails
+                              expiresIn: '10 minutes',
+                              emailError: emailError.message,
+                        });
+                  }
+
+                  return sendResponse(res, 200, true, 'If the email exists, an OTP has been sent to your email', null);
             }
-            // Production: don't return token
-            return sendResponse(res, 200, true, 'If the email exists, a password reset link has been sent', null);
       } catch (error) {
             return sendResponse(res, 500, false, 'Error processing password reset request', null, { details: error.message });
+      }
+};
+
+const verifyOtp = async (req, res) => {
+      try {
+            const { email, otp } = req.body;
+
+            const user = await User.findOne({
+                  email,
+                  resetPasswordToken: otp,
+                  resetPasswordExpires: { $gt: Date.now() },
+            });
+
+            if (!user) {
+                  return sendResponse(res, 400, false, 'Invalid or expired OTP', null);
+            }
+
+            // Generate a secure token for the actual password reset
+            const crypto = require('crypto');
+            const resetToken = crypto.randomBytes(32).toString('hex');
+
+            // Update user with the new secure token (still using the same field, preventing OTP reuse)
+            user.resetPasswordToken = resetToken;
+            // Refresh expiry for the reset step
+            user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes for the reset step
+            await user.save();
+
+            return sendResponse(res, 200, true, 'OTP verified', {
+                  resetToken, // The token needed for the next step
+            });
+      } catch (error) {
+            return sendResponse(res, 500, false, 'Error verifying OTP', null, { details: error.message });
       }
 };
 
@@ -276,6 +326,7 @@ const resetPassword = async (req, res) => {
       try {
             const { token, newPassword } = req.body;
 
+            // Find user with valid reset token
             const user = await User.findOne({
                   resetPasswordToken: token,
                   resetPasswordExpires: { $gt: Date.now() },
@@ -285,8 +336,14 @@ const resetPassword = async (req, res) => {
                   return sendResponse(res, 400, false, 'Invalid or expired reset token', null);
             }
 
-            // Update password and clear reset token
+            // Check if user has a password (Google OAuth users might not)
+            if (!user.password && !user.googleId) {
+                  return sendResponse(res, 400, false, 'Password reset not available for this account', null);
+            }
+
+            // Update password
             user.password = newPassword;
+            // Clear reset token
             user.resetPasswordToken = null;
             user.resetPasswordExpires = null;
             await user.save();
@@ -296,6 +353,8 @@ const resetPassword = async (req, res) => {
             return sendResponse(res, 500, false, 'Error resetting password', null, { details: error.message });
       }
 };
+
+
 
 const googleAuth = passport.authenticate('google', {
       scope: ['profile', 'email'],
@@ -349,6 +408,7 @@ module.exports = {
       editProfile,
       changePassword,
       forgotPassword,
+      verifyOtp,
       resetPassword,
       googleAuth,
       googleCallback,
