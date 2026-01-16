@@ -2,44 +2,41 @@ const fs = require('fs');
 const path = require('path');
 
 const validateEnv = () => {
-      // Check if .env file exists
-      const envPath = path.join(process.cwd(), '.env');
-      if (!fs.existsSync(envPath)) {
-            console.error('\n❌ .env file is missing!');
-            console.error(`   Expected location: ${envPath}`);
-            console.error('\n⚠️  Please create a .env file in the project root');
-            console.error('   You can copy .env.example and update the values:');
-            console.error('   cp .env.example .env\n');
-            process.exit(1);
-      }
+  // Detect if running in Docker
+  const isDocker = fs.existsSync('/.dockerenv') || process.env.DOCKER === 'true';
+  const envPath = path.join(process.cwd(), '.env');
+  const envFileExists = fs.existsSync(envPath);
 
-      // Required environment variables
-      const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+  // Only require .env file if not in Docker (Docker uses env_file or environment section)
+  if (!envFileExists && !isDocker) {
+    console.error('\n❌ .env file is missing!');
+    console.error(`   Expected location: ${envPath}`);
+    console.error('\n⚠️  Please create a .env file in the project root');
+    console.error('   You can copy .env.example and update the values:');
+    console.error('   cp .env.example .env\n');
+    process.exit(1);
+  }
 
-      // Recommended environment variables (with defaults but should be set)
-      const recommendedEnvVars = ['PORT', 'NODE_ENV'];
+  // Required environment variables
+  const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+  const recommendedEnvVars = ['PORT', 'NODE_ENV'];
+  const googleOAuthVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_CALLBACK_URL'];
 
-      // Optional environment variables (for future phases - commented out for now)
-      const googleOAuthVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_CALLBACK_URL'];
+  const missingRequired = [];
+  const invalidValues = [];
 
-      const missingRequired = [];
-      const invalidValues = [];
-
-      // Check required variables
-      requiredEnvVars.forEach((varName) => {
-            const value = process.env[varName];
-            if (!value || value.trim() === '') {
-                  missingRequired.push(varName);
-            } else {
-                  // Check for default placeholder values
-                  if (varName === 'JWT_SECRET' && value === 'your-super-secret-jwt-key-change-this-in-production') {
-                        invalidValues.push({
-                              name: varName,
-                              message: 'JWT_SECRET must be changed from the default placeholder value',
-                        });
-                  }
-            }
+  // Check required variables
+  requiredEnvVars.forEach((varName) => {
+    const value = process.env[varName];
+    if (!value || value.trim() === '') {
+      missingRequired.push(varName);
+    } else if (varName === 'JWT_SECRET' && value === 'your-super-secret-jwt-key-change-this-in-production') {
+      invalidValues.push({
+        name: varName,
+        message: 'JWT_SECRET must be changed from the default placeholder value',
       });
+    }
+  });
 
       // Validate Google OAuth variables (if any are set, all must be set and valid)
       const googleVarsSet = googleOAuthVars.filter((varName) => process.env[varName] && process.env[varName].trim() !== '');

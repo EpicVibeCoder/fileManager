@@ -1,9 +1,10 @@
 {
       "info": {
-            "_postman_id": "phase1-storage-management-api",
+            "_postman_id": "76864f8f-d108-4648-8c87-ebda172282d4",
             "name": "Storage Management API",
             "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- List Images\n- List PDFs\n- List Docs\n- Get File Details\n- Download File\n\n**Phase 6 Endpoints:**\n- Create Folder\n- List Folders\n- Create Subfolder\n- Upload File to Folder\n- Get Folder Contents\n- Rename Folder\n- Delete Folder",
-            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+            "_exporter_id": "2903335"
       },
       "item": [
             {
@@ -1361,8 +1362,13 @@
                                                 }
                                           }
                                     },
-                                    "url": "{{base_url}}/api/files/{{file_id}}/rename"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/{{file_id}}/rename",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "{{file_id}}", "rename"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Duplicate File",
@@ -1375,8 +1381,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/files/{{file_id}}/duplicate"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/{{file_id}}/duplicate",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "{{file_id}}", "duplicate"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Delete File",
@@ -1389,8 +1400,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/files/{{file_id}}"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/{{file_id}}",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "{{file_id}}"]
+                                    }
+                              },
+                              "response": []
                         }
                   ]
             },
@@ -1426,8 +1442,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/favorites/files/{{file_id}}"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/favorites/files/{{file_id}}",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "favorites", "files", "{{file_id}}"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Add Folder to Favorites",
@@ -1457,8 +1478,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/favorites/folders/{{folder_id}}"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/favorites/folders/{{folder_id}}",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "favorites", "folders", "{{folder_id}}"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "List Favorites",
@@ -1489,8 +1515,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/favorites"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/favorites",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "favorites"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Remove File from Favorites",
@@ -1520,8 +1551,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/favorites/files/{{file_id}}"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/favorites/files/{{file_id}}",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "favorites", "files", "{{file_id}}"]
+                                    }
+                              },
+                              "response": []
                         }
                   ]
             },
@@ -1558,8 +1594,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/dashboard"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/dashboard",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "dashboard"]
+                                    }
+                              },
+                              "response": []
                         }
                   ]
             },
@@ -1599,8 +1640,13 @@
                                                 }
                                           }
                                     },
-                                    "url": "{{base_url}}/api/vault/pin"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/vault/pin",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "vault", "pin"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Verify Vault PIN",
@@ -1635,8 +1681,13 @@
                                                 }
                                           }
                                     },
-                                    "url": "{{base_url}}/api/vault/verify"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/vault/verify",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "vault", "verify"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Move File to Vault",
@@ -1666,8 +1717,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/vault/files/{{file_id}}/move"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/vault/files/{{file_id}}/move",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "vault", "files", "{{file_id}}", "move"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Get Vault Items (Success)",
@@ -1705,8 +1761,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/vault"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/vault",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "vault"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Get Vault Items (Fail - No PIN)",
@@ -1732,8 +1793,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/vault"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/vault",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "vault"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Download Vault File",
@@ -1764,8 +1830,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/files/{{file_id}}/download"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/files/{{file_id}}/download",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "files", "{{file_id}}", "download"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Restore File from Vault",
@@ -1800,8 +1871,13 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/vault/files/{{file_id}}/restore"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/vault/files/{{file_id}}/restore",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "vault", "files", "{{file_id}}", "restore"]
+                                    }
+                              },
+                              "response": []
                         }
                   ]
             },
@@ -1850,8 +1926,19 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/calendar?date={{today}}"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/calendar?date={{today}}",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "calendar"],
+                                          "query": [
+                                                {
+                                                      "key": "date",
+                                                      "value": "{{today}}"
+                                                }
+                                          ]
+                                    }
+                              },
+                              "response": []
                         }
                   ]
             },
@@ -1893,8 +1980,13 @@
                                                 }
                                           }
                                     },
-                                    "url": "{{base_url}}/api/auth/refresh-token"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/auth/refresh-token",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "auth", "refresh-token"]
+                                    }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Verify Access Denied After Logout",
@@ -1920,9 +2012,14 @@
                                                 "type": "text"
                                           }
                                     ],
-                                    "url": "{{base_url}}/api/auth/profile",
+                                    "url": {
+                                          "raw": "{{base_url}}/api/auth/profile",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "auth", "profile"]
+                                    },
                                     "description": "Attempt to access protected resource with the revoked access token. Should fail immediately."
-                              }
+                              },
+                              "response": []
                         },
                         {
                               "name": "Revoke Token",
@@ -1951,8 +2048,13 @@
                                                 }
                                           }
                                     },
-                                    "url": "{{base_url}}/api/auth/revoke-token"
-                              }
+                                    "url": {
+                                          "raw": "{{base_url}}/api/auth/revoke-token",
+                                          "host": ["{{base_url}}"],
+                                          "path": ["api", "auth", "revoke-token"]
+                                    }
+                              },
+                              "response": []
                         }
                   ]
             }
@@ -1978,6 +2080,22 @@
                   "key": "base_url",
                   "value": "http://localhost:8080",
                   "type": "string"
+            },
+            {
+                  "key": "test_email",
+                  "value": ""
+            },
+            {
+                  "key": "auth_token",
+                  "value": ""
+            },
+            {
+                  "key": "refresh_token",
+                  "value": ""
+            },
+            {
+                  "key": "today",
+                  "value": ""
             }
       ]
 }

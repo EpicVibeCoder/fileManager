@@ -13,6 +13,9 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/filemanager
       - JWT_SECRET=docker_dev_secret
       - CORS_ORIGIN=*
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
     depends_on:
       - mongodb
     volumes:
