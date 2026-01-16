@@ -2,12 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 const validateEnv = () => {
-  // Detect if running in Docker
   const isDocker = fs.existsSync('/.dockerenv') || process.env.DOCKER === 'true';
   const envPath = path.join(process.cwd(), '.env');
   const envFileExists = fs.existsSync(envPath);
 
-  // Only require .env file if not in Docker (Docker uses env_file or environment section)
   if (!envFileExists && !isDocker) {
     console.error('\n❌ .env file is missing!');
     console.error(`   Expected location: ${envPath}`);
@@ -17,17 +15,14 @@ const validateEnv = () => {
     process.exit(1);
   }
 
-  // Required environment variables
   const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
   const recommendedEnvVars = ['PORT', 'NODE_ENV'];
   const googleOAuthVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_CALLBACK_URL'];
-  // Email configuration (optional - if any SMTP var is set, all should be set)
   const emailVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
 
   const missingRequired = [];
   const invalidValues = [];
 
-  // Check required variables
   requiredEnvVars.forEach((varName) => {
     const value = process.env[varName];
     if (!value || value.trim() === '') {
@@ -40,7 +35,6 @@ const validateEnv = () => {
     }
   });
 
-  // Validate Google OAuth variables (if any are set, all must be set and valid)
   const googleVarsSet = googleOAuthVars.filter((varName) => process.env[varName] && process.env[varName].trim() !== '');
 
   if (googleVarsSet.length > 0 && googleVarsSet.length < googleOAuthVars.length) {
@@ -55,7 +49,6 @@ const validateEnv = () => {
     process.exit(1);
   }
 
-  // Check for Google OAuth placeholder values
   if (googleVarsSet.length > 0) {
     googleOAuthVars.forEach((varName) => {
       const value = process.env[varName];
@@ -76,10 +69,8 @@ const validateEnv = () => {
     });
   }
 
-  // Validate Email configuration (optional but warn if not configured)
   const emailVarsSet = emailVars.filter((varName) => process.env[varName]?.trim());
 
-  // Warn if no email configuration is set
   if (emailVarsSet.length === 0) {
     console.warn('\n⚠️  Email configuration not set:');
     console.warn('   SMTP variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS) are not configured.');
@@ -87,7 +78,6 @@ const validateEnv = () => {
     console.warn('   OTP will be logged to console in development mode only.');
     console.warn('   To enable email, configure SMTP variables in your .env file.\n');
   } else if (emailVarsSet.length > 0 && emailVarsSet.length < emailVars.length) {
-    // Warn if email configuration is incomplete
     const missingEmailVars = emailVars.filter((varName) => !process.env[varName]?.trim());
     console.warn('\n⚠️  Email configuration incomplete:');
     console.warn('   If you set any SMTP variable, all should be set for email functionality:');
@@ -97,7 +87,6 @@ const validateEnv = () => {
     console.warn('   Email sending will NOT work. OTP will be logged to console.\n');
   }
 
-  // Check for email placeholder values
   if (emailVarsSet.length > 0) {
     if (process.env.SMTP_USER === 'your-email@gmail.com') {
       console.warn('⚠️  SMTP_USER appears to be a placeholder value. Email may not work correctly.\n');
@@ -107,7 +96,6 @@ const validateEnv = () => {
     }
   }
 
-  // Exit if required variables are missing
   if (missingRequired.length > 0) {
     console.error('\n❌ Missing required environment variables:');
     missingRequired.forEach((varName) => {
@@ -119,7 +107,6 @@ const validateEnv = () => {
     process.exit(1);
   }
 
-  // Exit if invalid values detected
   if (invalidValues.length > 0) {
     console.error('\n❌ Invalid environment variable values:');
     invalidValues.forEach(({ name, message }) => {
@@ -131,7 +118,6 @@ const validateEnv = () => {
     process.exit(1);
   }
 
-  // Warn about recommended variables
   const missingRecommended = recommendedEnvVars.filter((varName) => !process.env[varName] || process.env[varName].trim() === '');
   if (missingRecommended.length > 0) {
     console.warn('\n⚠️  Recommended environment variables not set (using defaults):');

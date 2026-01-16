@@ -1,8 +1,6 @@
 const nodemailer = require('nodemailer');
 
-// Create reusable transporter
 const createTransporter = () => {
-  // For development/testing without SMTP config, use mock transporter
   if (process.env.NODE_ENV === 'development' && !process.env.SMTP_HOST) {
     return {
       sendMail: async (options) => {
@@ -16,7 +14,6 @@ const createTransporter = () => {
     };
   }
 
-  // If SMTP config is missing, return mock
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     return {
       sendMail: async (options) => {
@@ -32,7 +29,7 @@ const createTransporter = () => {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    secure: process.env.SMTP_SECURE === 'true',
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
