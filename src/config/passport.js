@@ -33,56 +33,53 @@ passport.use(
 );
 
 // Google OAuth Strategy
-// Google OAuth Strategy
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-      passport.use(
-            new GoogleStrategy(
-                  {
-                        clientID: process.env.GOOGLE_CLIENT_ID,
-                        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                        callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:8080/api/auth/google/callback',
-                  },
-                  async (accessToken, refreshToken, profile, done) => {
-                        try {
-                              // Check if profile has email
-                              if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
-                                    return done(new Error('No email found in Google profile'), null);
-                              }
+passport.use(
+      new GoogleStrategy(
+            {
+                  clientID: process.env.GOOGLE_CLIENT_ID,
+                  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:8080/api/auth/google/callback',
+            },
+            async (accessToken, refreshToken, profile, done) => {
+                  try {
+                        // Check if profile has email
+                        if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
+                              return done(new Error('No email found in Google profile'), null);
+                        }
 
-                              const email = profile.emails[0].value;
-                              // Check if user exists with this Google ID
-                              let user = await User.findOne({ googleId: profile.id });
+                        const email = profile.emails[0].value;
+                        // Check if user exists with this Google ID
+                        let user = await User.findOne({ googleId: profile.id });
 
-                              if (user) {
-                                    return done(null, user);
-                              }
+                        if (user) {
+                              return done(null, user);
+                        }
 
-                              // Check if user exists by email to link account
-                              user = await User.findOne({ email });
+                        // Check if user exists by email to link account
+                        user = await User.findOne({ email });
 
-                              if (user) {
-                                    // Link Google account to existing user
-                                    user.googleId = profile.id;
-                                    await user.save();
-                                    return done(null, user);
-                              }
-
-                              // Create new user
-                              user = new User({
-                                    email,
-                                    username: profile.displayName || '',
-                                    googleId: profile.id,
-                                    agreementAccepted: true, // OAuth users implicitly agree
-                              });
-
+                        if (user) {
+                              // Link Google account to existing user
+                              user.googleId = profile.id;
                               await user.save();
                               return done(null, user);
-                        } catch (error) {
-                              return done(error, null);
                         }
-                  },
-            ),
-      );
-}
+
+                        // Create new user
+                        user = new User({
+                              email,
+                              username: profile.displayName || '',
+                              googleId: profile.id,
+                              agreementAccepted: true, // OAuth users implicitly agree
+                        });
+
+                        await user.save();
+                        return done(null, user);
+                  } catch (error) {
+                        return done(error, null);
+                  }
+            },
+      ),
+);
 
 module.exports = passport;
