@@ -138,7 +138,8 @@ const revokeToken = async (req, res) => {
             await RefreshToken.findOneAndUpdate({ token }, { revoked: Date.now(), revokedByIp: req.ip });
             return sendResponse(res, 200, true, 'Token revoked');
       } catch (err) {
-            return sendResponse(res, 500, false, 'Error revoking token');
+            console.error('Error revoking token:', err);
+            return sendResponse(res, 500, false, 'Error revoking token'); 
       }
 };
 
