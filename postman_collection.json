@@ -1,2162 +1,2512 @@
 {
-      "info": {
-            "_postman_id": "1552806f-304f-444f-ba2c-a80805d8b1a7",
-            "name": "Storage Management API",
-            "description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- List Images\n- List PDFs\n- List Docs\n- Get File Details\n- Download File\n\n**Phase 6 Endpoints:**\n- Create Folder\n- List Folders\n- Create Subfolder\n- Upload File to Folder\n- Get Folder Contents\n- Rename Folder\n- Delete Folder",
-            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-            "_exporter_id": "2903335"
-      },
-      "item": [
-            {
-                  "name": "Phase 1: Foundation",
-                  "item": [
-                        {
-                              "name": "Health Check",
-                              "item": [
-                                    {
-                                          "name": "Health Check - Server Status",
-                                          "event": [
-                                                {
-                                                      "listen": "test",
-                                                      "script": {
-                                                            "exec": [
-                                                                  "pm.test(\"Status code is 200\", function () {",
-                                                                  "    pm.response.to.have.status(200);",
-                                                                  "});",
-                                                                  "",
-                                                                  "pm.test(\"Response has success field\", function () {",
-                                                                  "    var jsonData = pm.response.json();",
-                                                                  "    pm.expect(jsonData).to.have.property('success');",
-                                                                  "});",
-                                                                  "",
-                                                                  "pm.test(\"Server is healthy\", function () {",
-                                                                  "    var jsonData = pm.response.json();",
-                                                                  "    pm.expect(jsonData.success).to.eql(true);",
-                                                                  "    pm.expect(jsonData.data.status).to.eql('healthy');",
-                                                                  "});",
-                                                                  "",
-                                                                  "pm.test(\"Response time is less than 500ms\", function () {",
-                                                                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
-                                                                  "});"
-                                                            ],
-                                                            "type": "text/javascript"
-                                                      }
-                                                }
-                                          ],
-                                          "request": {
-                                                "method": "GET",
-                                                "header": [],
-                                                "url": {
-                                                      "raw": "{{base_url}}/api/health",
-                                                      "host": ["{{base_url}}"],
-                                                      "path": ["api", "health"]
-                                                },
-                                                "description": "Check if the server is running and healthy. Returns server status and database connection status."
-                                          },
-                                          "response": []
-                                    },
-                                    {
-                                          "name": "Health Check - Database Connection",
-                                          "event": [
-                                                {
-                                                      "listen": "test",
-                                                      "script": {
-                                                            "exec": [
-                                                                  "pm.test(\"Status code is 200\", function () {",
-                                                                  "    pm.response.to.have.status(200);",
-                                                                  "});",
-                                                                  "",
-                                                                  "pm.test(\"Database status is present\", function () {",
-                                                                  "    var jsonData = pm.response.json();",
-                                                                  "    pm.expect(jsonData.data).to.have.property('database');",
-                                                                  "});",
-                                                                  "",
-                                                                  "pm.test(\"Database is connected\", function () {",
-                                                                  "    var jsonData = pm.response.json();",
-                                                                  "    pm.expect(jsonData.data.database).to.eql('connected');",
-                                                                  "});"
-                                                            ],
-                                                            "type": "text/javascript"
-                                                      }
-                                                }
-                                          ],
-                                          "request": {
-                                                "method": "GET",
-                                                "header": [],
-                                                "url": {
-                                                      "raw": "{{base_url}}/api/health",
-                                                      "host": ["{{base_url}}"],
-                                                      "path": ["api", "health"]
-                                                },
-                                                "description": "Verify that MongoDB database connection is established."
-                                          },
-                                          "response": []
-                                    }
-                              ],
-                              "description": "Health check endpoints to verify server and database connectivity"
-                        },
-                        {
-                              "name": "Server Connectivity",
-                              "item": [
-                                    {
-                                          "name": "Test Server Response Time",
-                                          "event": [
-                                                {
-                                                      "listen": "test",
-                                                      "script": {
-                                                            "exec": [
-                                                                  "pm.test(\"Response time is acceptable\", function () {",
-                                                                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
-                                                                  "});",
-                                                                  "",
-                                                                  "pm.test(\"Server is reachable\", function () {",
-                                                                  "    pm.response.to.not.have.status(0);",
-                                                                  "});"
-                                                            ],
-                                                            "type": "text/javascript"
-                                                      }
-                                                }
-                                          ],
-                                          "request": {
-                                                "method": "GET",
-                                                "header": [],
-                                                "url": {
-                                                      "raw": "{{base_url}}/api/health",
-                                                      "host": ["{{base_url}}"],
-                                                      "path": ["api", "health"]
-                                                },
-                                                "description": "Test server response time and connectivity"
-                                          },
-                                          "response": []
-                                    },
-                                    {
-                                          "name": "Test 404 Handler",
-                                          "event": [
-                                                {
-                                                      "listen": "test",
-                                                      "script": {
-                                                            "exec": [
-                                                                  "pm.test(\"Status code is 404\", function () {",
-                                                                  "    pm.response.to.have.status(404);",
-                                                                  "});",
-                                                                  "",
-                                                                  "pm.test(\"Response has error message\", function () {",
-                                                                  "    var jsonData = pm.response.json();",
-                                                                  "    pm.expect(jsonData).to.have.property('message');",
-                                                                  "    pm.expect(jsonData.success).to.eql(false);",
-                                                                  "});"
-                                                            ],
-                                                            "type": "text/javascript"
-                                                      }
-                                                }
-                                          ],
-                                          "request": {
-                                                "method": "GET",
-                                                "header": [],
-                                                "url": {
-                                                      "raw": "{{base_url}}/api/nonexistent",
-                                                      "host": ["{{base_url}}"],
-                                                      "path": ["api", "nonexistent"]
-                                                },
-                                                "description": "Test that 404 handler returns proper error response"
-                                          },
-                                          "response": []
-                                    }
-                              ],
-                              "description": "Tests for server connectivity and error handling"
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 2: User Authentication",
-                  "item": [
-                        {
-                              "name": "Signup - Success",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 201\", function () {",
-                                                      "    pm.response.to.have.status(201);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Response successful\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.message).to.eql(\"User registered successfully\");",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Token received\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data).to.have.property('accessToken');",
-                                                      "    pm.expect(jsonData.data).to.have.property('refreshToken');",
-                                                      "    pm.expect(jsonData.data.user).to.have.property('email');",
-                                                      "    // Store for future tests",
-                                                      "    pm.collectionVariables.set(\"test_email\", jsonData.data.user.email);",
-                                                      "    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
-                                                      "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"email\": \"test{{$timestamp}}@example.com\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\",\n    \"agreementAccepted\": \"true\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/signup",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "signup"]
-                                    },
-                                    "description": "Register a new user with valid details"
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Signup - Password Mismatch",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 400\", function () {",
-                                                      "    pm.response.to.have.status(400);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Error message validation\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(false);",
-                                                      "    // Either the main message or validation error details",
-                                                      "    // Based on controller, it explicitly says 'Passwords do not match'",
-                                                      "    // or it's caught by validation middleware.",
-                                                      "    // Current controller returns generic message or specific one.",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"email\": \"test_fail_{{$timestamp}}@example.com\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password456\",\n    \"agreementAccepted\": \"true\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/signup",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "signup"]
-                                    },
-                                    "description": "Try to register with mismatched passwords"
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Signup - Existing User",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 409\", function () {",
-                                                      "    pm.response.to.have.status(409);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Conflict error message\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(false);",
-                                                      "    pm.expect(jsonData.message).to.include(\"already exists\");",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\",\n    \"agreementAccepted\": \"true\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/signup",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "signup"]
-                                    },
-                                    "description": "Try to register with an email that already exists (requires Signup - Success to run first)"
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Login - Success",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Login successful\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Token returned\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data).to.have.property('accessToken');",
-                                                      "    pm.expect(jsonData.data).to.have.property('refreshToken');",
-                                                      "    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
-                                                      "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"password123\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/login",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "login"]
-                                    },
-                                    "description": "Login with the registered user"
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Login - Invalid Credentials",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 401\", function () {",
-                                                      "    pm.response.to.have.status(401);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Error message validation\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(false);",
-                                                      "    pm.expect(jsonData.message).to.eql(\"Invalid email or password\");",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"wrongpassword\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/login",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "login"]
-                                    },
-                                    "description": "Try to login with wrong password"
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Logout",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Logout successful\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/logout",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "logout"]
-                                    },
-                                    "description": "Logout user and revoke refresh token"
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 3: User Profile Management",
-                  "item": [
-                        {
-                              "name": "Update Profile",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Username updated\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data.user.username).to.eql(\"Updated Name\");",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "PUT",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"username\": \"Updated Name\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/profile",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "profile"]
-                                    },
-                                    "description": "Allow logged-in user to update their username."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Change Password",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Success message\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"oldPassword\": \"password123\",\n    \"newPassword\": \"newpassword123\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/change-password",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "change-password"]
-                                    },
-                                    "description": "Allow logged-in user to change their password."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Forgot Password",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Success message\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "});",
-                                                      "",
-                                                      "// Capture OTP if exposed for testing (Development mode logic)",
-                                                      "try {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    if (jsonData.data && jsonData.data.otp) {",
-                                                      "        pm.collectionVariables.set(\"reset_otp\", jsonData.data.otp);",
-                                                      "        console.log(\"OTP Captured:\", jsonData.data.otp);",
-                                                      "    }",
-                                                      "} catch(e) {}"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"email\": \"{{test_email}}\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/forgot-password",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "forgot-password"]
-                                    },
-                                    "description": "Request password reset link/token."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Verify OTP",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Token returned\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.have.property('resetToken');",
-                                                      "    pm.collectionVariables.set(\"reset_token\", jsonData.data.resetToken);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"email\": \"{{test_email}}\",\n    \"otp\": \"{{reset_otp}}\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/verify-otp",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "verify-otp"]
-                                    },
-                                    "description": "Verify the OTP and get the reset token."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Reset Password",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Success message\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"token\": \"{{reset_token}}\",\n    \"newPassword\": \"password123\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/reset-password",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "reset-password"]
-                                    },
-                                    "description": "Reset password using the token."
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 4: Google OAuth",
-                  "item": [
-                        {
-                              "name": "Initiate Google OAuth (Test endpoint in browser. Recommended)",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "// This request redirects to Google. Postman might follow the redirect.",
-                                                      "// If 'Automatically follow redirects' is OFF, you get 302.",
-                                                      "// If ON, you get 200 (the Google login page).",
-                                                      "",
-                                                      "pm.test(\"Status code is 200 or 302\", function () {",
-                                                      "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
-                                                      "});",
-                                                      "",
-                                                      "// Visualizer warning for user",
-                                                      "var template = `",
-                                                      "    <div style=\"background-color: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 5px; font-family: Arial, sans-serif;\">",
-                                                      "        <h3 style=\"margin-top: 0;\">⚠️ Action Required: Open in External Browser</h3>",
-                                                      "        <p>Google OAuth authentication <strong>will not work</strong> inside Postman properly (you may see a 'Disallowed User Agent' error or a blank page).</p>",
-                                                      "        <p>Please copy the full URL below and open it in your regular browser (Chrome, Firefox, Edge, etc.) to complete the login:</p>",
-                                                      "        <div style=\"background-color: #ffffff; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px; overflow-x: auto; margin-top: 10px;\">",
-                                                      "            <code style=\"white-space: pre-wrap; word-break: break-all;\">{{requestUrl}}</code>",
-                                                      "        </div>",
-                                                      "        <p style=\"margin-bottom: 0; margin-top: 15px; font-size: 0.9em; color: #6c757d;\">After logging in, you will be redirected to the callback URL. Copy the 'code' parameter from that URL to proceed to the next step.</p>",
-                                                      "    </div>",
-                                                      "`;",
-                                                      "",
-                                                      "pm.visualizer.set(template, {",
-                                                      "    requestUrl: pm.request.url.toString()",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/google",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "google"]
-                                    },
-                                    "description": "Initiates the Google OAuth flow. This will redirect to Google's login page."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Google OAuth Callback (Test endpoint in browser. Recommended)",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code check\", function () {",
-                                                      "    // Fails (401 or similar) if no code is provided, or 200 if valid code provided manually",
-                                                      "    // This test expects failure for the template request",
-                                                      "    if (pm.request.url.query.has(\"code\")) {",
-                                                      "        pm.response.to.have.status(200);",
-                                                      "    } else {",
-                                                      "        // Expect failure or error message if code is missing",
-                                                      "        pm.expect(pm.response.code).to.be.oneOf([400, 401, 500]);",
-                                                      "    }",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/google/callback?code=PASTE_CODE_HERE",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "google", "callback"],
-                                          "query": [
-                                                {
-                                                      "key": "code",
-                                                      "value": "PASTE_CODE_HERE",
-                                                      "description": "The Authorization Code returned by Google"
-                                                }
-                                          ]
-                                    },
-                                    "description": "Callback URL for Google. Phase 4 completion requires pasting the code from the browser redirect here manually."
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 5: File Management",
-                  "item": [
-                        {
-                              "name": "Upload File",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 201\", function () {",
-                                                      "    pm.response.to.have.status(201);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"File uploaded successfully\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.have.property('_id');",
-                                                      "    pm.collectionVariables.set(\"file_id\", jsonData.data._id);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "formdata",
-                                          "formdata": [
-                                                {
-                                                      "key": "file",
-                                                      "type": "file",
-                                                      "src": []
-                                                }
-                                          ]
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/upload",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "upload"]
-                                    },
-                                    "description": "Upload a file (select a file in the Body -> form-data tab)."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "List Files",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Files retrieved successfully\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.be.an('array');",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files"]
-                                    },
-                                    "description": "List all uploaded files."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "List Images",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Files retrieved successfully\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.be.an('array');",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files?type=image",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files"],
-                                          "query": [
-                                                {
-                                                      "key": "type",
-                                                      "value": "image"
-                                                }
-                                          ]
-                                    },
-                                    "description": "List all uploaded image files."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "List PDFs",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Files retrieved successfully\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.be.an('array');",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files?type=pdf",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files"],
-                                          "query": [
-                                                {
-                                                      "key": "type",
-                                                      "value": "pdf"
-                                                }
-                                          ]
-                                    },
-                                    "description": "List all uploaded PDF files."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "List Docs",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Files retrieved successfully\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.be.an('array');",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files?type=doc",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files"],
-                                          "query": [
-                                                {
-                                                      "key": "type",
-                                                      "value": "doc"
-                                                }
-                                          ]
-                                    },
-                                    "description": "List all uploaded document files."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Get File Details",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"File details retrieved\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.have.property('_id');",
-                                                      "    pm.expect(jsonData.data._id).to.eql(pm.collectionVariables.get(\"file_id\"));",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/{{file_id}}",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "{{file_id}}"]
-                                    },
-                                    "description": "Get details of a specific file."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Download File",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/{{file_id}}/download",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "{{file_id}}", "download"]
-                                    },
-                                    "description": "Download a specific file."
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 6: Folder Management",
-                  "item": [
-                        {
-                              "name": "Create Folder",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 201\", function () {",
-                                                      "    pm.response.to.have.status(201);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Folder created\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data).to.have.property('name', 'Docs');",
-                                                      "    pm.collectionVariables.set(\"folder_id\", jsonData.data._id);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"name\": \"Docs\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/folders",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "folders"]
-                                    },
-                                    "description": "Create a new folder."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "List Folders",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Folders listed\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data).to.be.an('array');",
-                                                      "    // Verify our new folder is there",
-                                                      "    const folder = jsonData.data.find(f => f._id === pm.collectionVariables.get('folder_id'));",
-                                                      "    pm.expect(folder).to.exist;",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/folders",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "folders"]
-                                    },
-                                    "description": "List root folders."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Create Subfolder",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 201\", function () {",
-                                                      "    pm.response.to.have.status(201);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Subfolder created\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.parentId).to.eql(pm.collectionVariables.get('folder_id'));",
-                                                      "    pm.collectionVariables.set(\"subfolder_id\", jsonData.data._id);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"name\": \"Nest\",\n    \"parentId\": \"{{folder_id}}\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/folders",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "folders"]
-                                    },
-                                    "description": "Create a subfolder inside the 'Docs' folder."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Upload File to Folder",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 201\", function () {",
-                                                      "    pm.response.to.have.status(201);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"File uploaded to folder\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data.folderId).to.eql(pm.collectionVariables.get('folder_id'));",
-                                                      "    pm.collectionVariables.set(\"folder_file_id\", jsonData.data._id);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "formdata",
-                                          "formdata": [
-                                                {
-                                                      "key": "file",
-                                                      "type": "file",
-                                                      "src": []
-                                                },
-                                                {
-                                                      "key": "folderId",
-                                                      "value": "{{folder_id}}",
-                                                      "type": "text"
-                                                }
-                                          ]
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/upload",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "upload"]
-                                    },
-                                    "description": "Upload a file into the 'Docs' folder."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Get Folder Contents",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Contents retrieved\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    // Should find our subfolder 'Nest'",
-                                                      "    const sub = jsonData.data.subfolders.find(f => f._id === pm.collectionVariables.get('subfolder_id'));",
-                                                      "    pm.expect(sub).to.exist;",
-                                                      "    // Should find our uploaded file",
-                                                      "    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('folder_file_id'));",
-                                                      "    pm.expect(file).to.exist;",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/folders/{{folder_id}}/files",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "folders", "{{folder_id}}", "files"]
-                                    },
-                                    "description": "List files and subfolders within 'Docs'."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Rename Folder",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "",
-                                                      "pm.test(\"Folder renamed\", function () {",
-                                                      "    pm.expect(pm.response.json().data.name).to.eql(\"Documents\");",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "PUT",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"name\": \"Documents\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/folders/{{folder_id}}/rename",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "folders", "{{folder_id}}", "rename"]
-                                    },
-                                    "description": "Rename 'Docs' to 'Documents'."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Delete Folder",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "DELETE",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/folders/{{folder_id}}",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "folders", "{{folder_id}}"]
-                                    },
-                                    "description": "Delete 'Documents' folder. This should recursively delete the subfolder and the file inside it."
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 7: Advanced File Operations",
-                  "item": [
-                        {
-                              "name": "Rename File",
-                              "request": {
-                                    "method": "PUT",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"name\": \"renamed_file.txt\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/{{file_id}}/rename",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "{{file_id}}", "rename"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Duplicate File",
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/{{file_id}}/duplicate",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "{{file_id}}", "duplicate"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Delete File",
-                              "request": {
-                                    "method": "DELETE",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/{{file_id}}",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "{{file_id}}"]
-                                    }
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 8: Favorites",
-                  "item": [
-                        {
-                              "name": "Add File to Favorites",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Is Favorite\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.success).to.eql(true);",
-                                                      "    pm.expect(jsonData.data.isFavorite).to.eql(true);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/favorites/files/{{file_id}}",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "favorites", "files", "{{file_id}}"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Add Folder to Favorites",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Is Favorite\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.isFavorite).to.eql(true);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/favorites/folders/{{folder_id}}",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "favorites", "folders", "{{folder_id}}"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "List Favorites",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Favorites returned\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.files).to.be.an('array');",
-                                                      "    pm.expect(jsonData.data.folders).to.be.an('array');",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/favorites",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "favorites"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Remove File from Favorites",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Is Not Favorite\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.isFavorite).to.eql(false);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "DELETE",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/favorites/files/{{file_id}}",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "favorites", "files", "{{file_id}}"]
-                                    }
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 9: Dashboard",
-                  "item": [
-                        {
-                              "name": "Get Dashboard Stats",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Stats structure\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data).to.have.property('storage');",
-                                                      "    pm.expect(jsonData.data).to.have.property('fileStats');",
-                                                      "    pm.expect(jsonData.data).to.have.property('recentItems');",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/dashboard",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "dashboard"]
-                                    }
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 10: Vault",
-                  "item": [
-                        {
-                              "name": "Set Vault PIN",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 201\", function () {",
-                                                      "    pm.response.to.have.status(201);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"pin\": \"1234\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/vault/pin",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "vault", "pin"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Verify Vault PIN",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"pin\": \"1234\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/vault/verify",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "vault", "verify"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Move File to Vault",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Is Vault\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.isVault).to.eql(true);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/vault/files/{{file_id}}/move",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "vault", "files", "{{file_id}}", "move"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Get Vault Items (Success)",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Items retrieved\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.files).to.be.an('array');",
-                                                      "    // Should find our file",
-                                                      "    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('file_id'));",
-                                                      "    pm.expect(file).to.exist;",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          },
-                                          {
-                                                "key": "x-vault-pin",
-                                                "value": "1234",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/vault",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "vault"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Get Vault Items (Fail - No PIN)",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 401\", function () {",
-                                                      "    pm.response.to.have.status(401);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/vault",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "vault"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Download Vault File",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          },
-                                          {
-                                                "key": "x-vault-pin",
-                                                "value": "1234",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/files/{{file_id}}/download",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "files", "{{file_id}}", "download"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Restore File from Vault",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Is Not Vault\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.isVault).to.eql(false);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          },
-                                          {
-                                                "key": "x-vault-pin",
-                                                "value": "1234",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/vault/files/{{file_id}}/restore",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "vault", "files", "{{file_id}}", "restore"]
-                                    }
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 11: Calendar",
-                  "item": [
-                        {
-                              "name": "Get Items by Date",
-                              "event": [
-                                    {
-                                          "listen": "prerequest",
-                                          "script": {
-                                                "exec": [
-                                                      "var d = new Date();",
-                                                      "var dateString = d.getFullYear() + \"-\" + (\"0\"+(d.getMonth()+1)).slice(-2) + \"-\" + (\"0\" + d.getDate()).slice(-2);",
-                                                      "pm.collectionVariables.set(\"today\", dateString);"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    },
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Items retrieved\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data.files).to.be.an('array');",
-                                                      "    // Should find our file recently uploaded",
-                                                      "    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('file_id'));",
-                                                      "    pm.expect(file).to.exist;",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/calendar?date={{today}}",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "calendar"],
-                                          "query": [
-                                                {
-                                                      "key": "date",
-                                                      "value": "{{today}}"
-                                                }
-                                          ]
-                                    }
-                              },
-                              "response": []
-                        }
-                  ]
-            },
-            {
-                  "name": "Phase 12: Token Lifecycle",
-                  "item": [
-                        {
-                              "name": "Refresh Token",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"New tokens received\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.data).to.have.property('accessToken');",
-                                                      "    pm.expect(jsonData.data).to.have.property('refreshToken');",
-                                                      "    // Update vars with new tokens",
-                                                      "    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
-                                                      "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/refresh-token",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "refresh-token"]
-                                    }
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Verify Access Denied After Logout",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 401\", function () {",
-                                                      "    pm.response.to.have.status(401);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "GET",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{auth_token}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/profile",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "profile"]
-                                    },
-                                    "description": "Attempt to access protected resource with the revoked access token. Should fail immediately."
-                              },
-                              "response": []
-                        },
-                        {
-                              "name": "Revoke Token",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "POST",
-                                    "header": [],
-                                    "body": {
-                                          "mode": "raw",
-                                          "raw": "{\n    \"token\": \"{{refresh_token}}\"\n}",
-                                          "options": {
-                                                "raw": {
-                                                      "language": "json"
-                                                }
-                                          }
-                                    },
-                                    "url": {
-                                          "raw": "{{base_url}}/api/auth/revoke-token",
-                                          "host": ["{{base_url}}"],
-                                          "path": ["api", "auth", "revoke-token"]
-                                    }
-                              },
-                              "response": []
-                        }
-                  ]
-            }
-      ],
-      "event": [
-            {
-                  "listen": "prerequest",
-                  "script": {
-                        "type": "text/javascript",
-                        "exec": [""]
-                  }
-            },
-            {
-                  "listen": "test",
-                  "script": {
-                        "type": "text/javascript",
-                        "exec": [""]
-                  }
-            }
-      ],
-      "variable": [
-            {
-                  "key": "base_url",
-                  "value": "http://localhost:8080",
-                  "type": "string"
-            },
-            {
-                  "key": "test_email",
-                  "value": ""
-            },
-            {
-                  "key": "auth_token",
-                  "value": ""
-            },
-            {
-                  "key": "refresh_token",
-                  "value": ""
-            },
-            {
-                  "key": "today",
-                  "value": ""
-            }
-      ]
+	"info": {
+		"_postman_id": "963d7034-86c3-4284-95ff-2d343408672a",
+		"name": "Storage Management API",
+		"description": "Postman collection for Storage Management API.\n\n**Phase 1 Endpoints:**\n- Health check endpoint\n- Server connectivity tests\n\n**Phase 2 Endpoints:**\n- User Registration\n- User Login\n- User Logout\n\n**Phase 3 Endpoints:**\n- Update Profile\n- Change Password\n- Forgot/Reset Password\n\n**Phase 4 Endpoints:**\n- Initiate Google OAuth\n- Google OAuth Callback\n\n**Phase 5 Endpoints:**\n- Upload File\n- List Files\n- List Images\n- List PDFs\n- List Docs\n- Get File Details\n- Download File\n\n**Phase 6 Endpoints:**\n- Create Folder\n- List Folders\n- Create Subfolder\n- Upload File to Folder\n- Get Folder Contents\n- Rename Folder\n- Delete Folder",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2903335"
+	},
+	"item": [
+		{
+			"name": "Phase 1: Foundation",
+			"item": [
+				{
+					"name": "Health Check",
+					"item": [
+						{
+							"name": "Health Check - Server Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response has success field\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('success');",
+											"});",
+											"",
+											"pm.test(\"Server is healthy\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.eql(true);",
+											"    pm.expect(jsonData.data.status).to.eql('healthy');",
+											"});",
+											"",
+											"pm.test(\"Response time is less than 500ms\", function () {",
+											"    pm.expect(pm.response.responseTime).to.be.below(500);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"health"
+									]
+								},
+								"description": "Check if the server is running and healthy. Returns server status and database connection status."
+							},
+							"response": []
+						},
+						{
+							"name": "Health Check - Database Connection",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Database status is present\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data).to.have.property('database');",
+											"});",
+											"",
+											"pm.test(\"Database is connected\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.database).to.eql('connected');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"health"
+									]
+								},
+								"description": "Verify that MongoDB database connection is established."
+							},
+							"response": []
+						}
+					],
+					"description": "Health check endpoints to verify server and database connectivity"
+				},
+				{
+					"name": "Server Connectivity",
+					"item": [
+						{
+							"name": "Test Server Response Time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response time is acceptable\", function () {",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+											"});",
+											"",
+											"pm.test(\"Server is reachable\", function () {",
+											"    pm.response.to.not.have.status(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"health"
+									]
+								},
+								"description": "Test server response time and connectivity"
+							},
+							"response": []
+						},
+						{
+							"name": "Test 404 Handler",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"pm.test(\"Response has error message\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('message');",
+											"    pm.expect(jsonData.success).to.eql(false);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/nonexistent",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"nonexistent"
+									]
+								},
+								"description": "Test that 404 handler returns proper error response"
+							},
+							"response": []
+						}
+					],
+					"description": "Tests for server connectivity and error handling"
+				}
+			]
+		},
+		{
+			"name": "Phase 2: User Authentication",
+			"item": [
+				{
+					"name": "Signup - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.message).to.eql(\"User registered successfully\");",
+									"});",
+									"",
+									"pm.test(\"Token received\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('accessToken');",
+									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
+									"    pm.expect(jsonData.data.user).to.have.property('email');",
+									"    // Store for future tests",
+									"    pm.collectionVariables.set(\"test_email\", jsonData.data.user.email);",
+									"    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test{{$timestamp}}@example.com\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\",\n    \"agreementAccepted\": \"true\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Register a new user with valid details"
+					},
+					"response": []
+				},
+				{
+					"name": "Signup - Password Mismatch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message validation\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"    // Either the main message or validation error details",
+									"    // Based on controller, it explicitly says 'Passwords do not match'",
+									"    // or it's caught by validation middleware.",
+									"    // Current controller returns generic message or specific one.",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test_fail_{{$timestamp}}@example.com\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password456\",\n    \"agreementAccepted\": \"true\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to register with mismatched passwords"
+					},
+					"response": []
+				},
+				{
+					"name": "Signup - Existing User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test(\"Conflict error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"    pm.expect(jsonData.message).to.include(\"already exists\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\",\n    \"agreementAccepted\": \"true\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Try to register with an email that already exists (requires Signup - Success to run first)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Login successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"Token returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('accessToken');",
+									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
+									"    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with the registered user"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Invalid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Error message validation\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid email or password\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"wrongpassword\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Try to login with wrong password"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Logout successful\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout user and revoke refresh token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 3: User Profile Management",
+			"item": [
+				{
+					"name": "Update Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Username updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.user.username).to.eql(\"Updated Name\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"Updated Name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Allow logged-in user to update their username."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Success message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"oldPassword\": \"password123\",\n    \"newPassword\": \"newpassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"change-password"
+							]
+						},
+						"description": "Allow logged-in user to change their password."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Success message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"// Capture OTP if exposed for testing (Development mode logic)",
+									"try {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.otp) {",
+									"        pm.collectionVariables.set(\"reset_otp\", jsonData.data.otp);",
+									"        console.log(\"OTP Captured:\", jsonData.data.otp);",
+									"    }",
+									"} catch(e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Request password reset link/token."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Token returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.have.property('resetToken');",
+									"    pm.collectionVariables.set(\"reset_token\", jsonData.data.resetToken);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"otp\": \"{{reset_otp}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-otp"
+							]
+						},
+						"description": "Verify the OTP and get the reset token."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Success message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{reset_token}}\",\n    \"newPassword\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Reset password using the token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 4: Google OAuth",
+			"item": [
+				{
+					"name": "Initiate Google OAuth (Test endpoint in browser. Recommended)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This request redirects to Google. Postman might follow the redirect.",
+									"// If 'Automatically follow redirects' is OFF, you get 302.",
+									"// If ON, you get 200 (the Google login page).",
+									"",
+									"pm.test(\"Status code is 200 or 302\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+									"});",
+									"",
+									"// Visualizer warning for user",
+									"var template = `",
+									"    <div style=\"background-color: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 5px; font-family: Arial, sans-serif;\">",
+									"        <h3 style=\"margin-top: 0;\">⚠️ Action Required: Open in External Browser</h3>",
+									"        <p>Google OAuth authentication <strong>will not work</strong> inside Postman properly (you may see a 'Disallowed User Agent' error or a blank page).</p>",
+									"        <p>Please copy the full URL below and open it in your regular browser (Chrome, Firefox, Edge, etc.) to complete the login:</p>",
+									"        <div style=\"background-color: #ffffff; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px; overflow-x: auto; margin-top: 10px;\">",
+									"            <code style=\"white-space: pre-wrap; word-break: break-all;\">{{requestUrl}}</code>",
+									"        </div>",
+									"        <p style=\"margin-bottom: 0; margin-top: 15px; font-size: 0.9em; color: #6c757d;\">After logging in, you will be redirected to the callback URL. Copy the 'code' parameter from that URL to proceed to the next step.</p>",
+									"    </div>",
+									"`;",
+									"",
+									"pm.visualizer.set(template, {",
+									"    requestUrl: pm.request.url.toString()",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/google",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"google"
+							]
+						},
+						"description": "Initiates the Google OAuth flow. This will redirect to Google's login page."
+					},
+					"response": []
+				},
+				{
+					"name": "Google OAuth Callback (Test endpoint in browser. Recommended)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code check\", function () {",
+									"    // Fails (401 or similar) if no code is provided, or 200 if valid code provided manually",
+									"    // This test expects failure for the template request",
+									"    if (pm.request.url.query.has(\"code\")) {",
+									"        pm.response.to.have.status(200);",
+									"    } else {",
+									"        // Expect failure or error message if code is missing",
+									"        pm.expect(pm.response.code).to.be.oneOf([400, 401, 500]);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/google/callback?code=PASTE_CODE_HERE",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"google",
+								"callback"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "PASTE_CODE_HERE",
+									"description": "The Authorization Code returned by Google"
+								}
+							]
+						},
+						"description": "Callback URL for Google. Phase 4 completion requires pasting the code from the browser redirect here manually."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 5: File Management",
+			"item": [
+				{
+					"name": "Upload File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"File uploaded successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.have.property('_id');",
+									"    pm.collectionVariables.set(\"file_id\", jsonData.data._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/files/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"upload"
+							]
+						},
+						"description": "Upload a file (select a file in the Body -> form-data tab)."
+					},
+					"response": []
+				},
+				{
+					"name": "List Files",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Files retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files"
+							]
+						},
+						"description": "List all uploaded files."
+					},
+					"response": []
+				},
+				{
+					"name": "List Images",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Files retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files?type=image",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "image"
+								}
+							]
+						},
+						"description": "List all uploaded image files."
+					},
+					"response": []
+				},
+				{
+					"name": "List PDFs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Files retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files?type=pdf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "pdf"
+								}
+							]
+						},
+						"description": "List all uploaded PDF files."
+					},
+					"response": []
+				},
+				{
+					"name": "List Docs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Files retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files?type=doc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "doc"
+								}
+							]
+						},
+						"description": "List all uploaded document files."
+					},
+					"response": []
+				},
+				{
+					"name": "Get File Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"File details retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.have.property('_id');",
+									"    pm.expect(jsonData.data._id).to.eql(pm.collectionVariables.get(\"file_id\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files/{{file_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"{{file_id}}"
+							]
+						},
+						"description": "Get details of a specific file."
+					},
+					"response": []
+				},
+				{
+					"name": "Download File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files/{{file_id}}/download",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"{{file_id}}",
+								"download"
+							]
+						},
+						"description": "Download a specific file."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 6: Folder Management",
+			"item": [
+				{
+					"name": "Create Folder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Folder created\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.have.property('name', 'Docs');",
+									"    pm.collectionVariables.set(\"folder_id\", jsonData.data._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Docs\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/folders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"folders"
+							]
+						},
+						"description": "Create a new folder."
+					},
+					"response": []
+				},
+				{
+					"name": "List Folders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Folders listed\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    // Verify our new folder is there",
+									"    const folder = jsonData.data.find(f => f._id === pm.collectionVariables.get('folder_id'));",
+									"    pm.expect(folder).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/folders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"folders"
+							]
+						},
+						"description": "List root folders."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Subfolder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Subfolder created\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.parentId).to.eql(pm.collectionVariables.get('folder_id'));",
+									"    pm.collectionVariables.set(\"subfolder_id\", jsonData.data._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Nest\",\n    \"parentId\": \"{{folder_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/folders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"folders"
+							]
+						},
+						"description": "Create a subfolder inside the 'Docs' folder."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload File to Folder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"File uploaded to folder\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.folderId).to.eql(pm.collectionVariables.get('folder_id'));",
+									"    pm.collectionVariables.set(\"folder_file_id\", jsonData.data._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "folderId",
+									"value": "{{folder_id}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/files/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"upload"
+							]
+						},
+						"description": "Upload a file into the 'Docs' folder."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Folder Contents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Contents retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    // Should find our subfolder 'Nest'",
+									"    const sub = jsonData.data.subfolders.find(f => f._id === pm.collectionVariables.get('subfolder_id'));",
+									"    pm.expect(sub).to.exist;",
+									"    // Should find our uploaded file",
+									"    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('folder_file_id'));",
+									"    pm.expect(file).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/folders/{{folder_id}}/files",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"folders",
+								"{{folder_id}}",
+								"files"
+							]
+						},
+						"description": "List files and subfolders within 'Docs'."
+					},
+					"response": []
+				},
+				{
+					"name": "Rename Folder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Folder renamed\", function () {",
+									"    pm.expect(pm.response.json().data.name).to.eql(\"Documents\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Documents\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/folders/{{folder_id}}/rename",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"folders",
+								"{{folder_id}}",
+								"rename"
+							]
+						},
+						"description": "Rename 'Docs' to 'Documents'."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Folder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/folders/{{folder_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"folders",
+								"{{folder_id}}"
+							]
+						},
+						"description": "Delete 'Documents' folder. This should recursively delete the subfolder and the file inside it."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 7: Advanced File Operations",
+			"item": [
+				{
+					"name": "Rename File",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"renamed_file.txt\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/files/{{file_id}}/rename",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"{{file_id}}",
+								"rename"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files/{{file_id}}/duplicate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"{{file_id}}",
+								"duplicate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files/{{file_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"{{file_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 8: Favorites",
+			"item": [
+				{
+					"name": "Add File to Favorites",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Is Favorite\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.isFavorite).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/files/{{file_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites",
+								"files",
+								"{{file_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Folder to Favorites",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Is Favorite\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.isFavorite).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/folders/{{folder_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites",
+								"folders",
+								"{{folder_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Favorites",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Favorites returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.files).to.be.an('array');",
+									"    pm.expect(jsonData.data.folders).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove File from Favorites",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Is Not Favorite\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.isFavorite).to.eql(false);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/files/{{file_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"favorites",
+								"files",
+								"{{file_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 9: Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Stats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Stats structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('storage');",
+									"    pm.expect(jsonData.data).to.have.property('fileStats');",
+									"    pm.expect(jsonData.data).to.have.property('recentItems');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 10: Vault",
+			"item": [
+				{
+					"name": "Set Vault PIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pin\": \"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/vault/pin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"vault",
+								"pin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Vault PIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pin\": \"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/vault/verify",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"vault",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Move File to Vault",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Is Vault\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.isVault).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/vault/files/{{file_id}}/move",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"vault",
+								"files",
+								"{{file_id}}",
+								"move"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vault Items (Success)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Items retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.files).to.be.an('array');",
+									"    // Should find our file",
+									"    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('file_id'));",
+									"    pm.expect(file).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-vault-pin",
+								"value": "1234",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/vault",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"vault"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vault Items (Fail - No PIN)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/vault",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"vault"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download Vault File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-vault-pin",
+								"value": "1234",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/files/{{file_id}}/download",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"{{file_id}}",
+								"download"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restore File from Vault",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Is Not Vault\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.isVault).to.eql(false);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-vault-pin",
+								"value": "1234",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/vault/files/{{file_id}}/restore",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"vault",
+								"files",
+								"{{file_id}}",
+								"restore"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 11: Calendar",
+			"item": [
+				{
+					"name": "Get Items by Date",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// User can set 'custom_calendar_date' in Collection Variables.",
+									"// Supported formats: YYYY-MM-DD, DD-MM-YYYY, or DD-MM-YY.",
+									"// Script converts all to YYYY-MM-DD for the API.",
+									"var customDate = pm.collectionVariables.get(\"custom_calendar_date\");",
+									"",
+									"if (customDate) {",
+									"    // Check ISO format YYYY-MM-DD",
+									"    if (customDate.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {",
+									"        pm.collectionVariables.set(\"test_date\", customDate);",
+									"        console.log(\"Using custom date (ISO):\", customDate);",
+									"    }",
+									"    // Check DD-MM-YYYY or DD-MM-YY",
+									"    else if (customDate.match(/^(\\d{2})-(\\d{2})-(\\d{2,4})$/)) {",
+									"        var match = customDate.match(/^(\\d{2})-(\\d{2})-(\\d{2,4})$/);",
+									"        var day = match[1];",
+									"        var month = match[2];",
+									"        var year = match[3];",
+									"        if (year.length === 2) year = \"20\" + year;",
+									"        var isoDate = year + \"-\" + month + \"-\" + day;",
+									"        pm.collectionVariables.set(\"test_date\", isoDate);",
+									"        console.log(\"Converted custom date to ISO:\", isoDate);",
+									"    } else {",
+									"        console.log(\"Invalid custom date format. Using today.\");",
+									"        setDefaultDate();",
+									"    }",
+									"} else {",
+									"    setDefaultDate();",
+									"}",
+									"",
+									"function setDefaultDate() {",
+									"    var d = new Date();",
+									"    var dateString = d.getFullYear() + \"-\" + (\"0\"+(d.getMonth()+1)).slice(-2) + \"-\" + (\"0\" + d.getDate()).slice(-2);",
+									"    pm.collectionVariables.set(\"test_date\", dateString);",
+									"    console.log(\"Using today's date:\", dateString);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Items retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.files).to.be.an('array');",
+									"    // Should find our file recently uploaded",
+									"    const file = jsonData.data.files.find(f => f._id === pm.collectionVariables.get('file_id'));",
+									"    pm.expect(file).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/calendar?date={{test_date}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"calendar"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "{{test_date}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase 12: Token Lifecycle",
+			"item": [
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"New tokens received\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('accessToken');",
+									"    pm.expect(jsonData.data).to.have.property('refreshToken');",
+									"    // Update vars with new tokens",
+									"    pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refreshToken);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Access Denied After Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Attempt to access protected resource with the revoked access token. Should fail immediately."
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/revoke-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"revoke-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "test_email",
+			"value": ""
+		},
+		{
+			"key": "auth_token",
+			"value": ""
+		},
+		{
+			"key": "refresh_token",
+			"value": ""
+		},
+		{
+			"key": "today",
+			"value": ""
+		},
+		{
+			"key": "reset_otp",
+			"value": ""
+		},
+		{
+			"key": "reset_token",
+			"value": ""
+		},
+		{
+			"key": "test_date",
+			"value": ""
+		},
+		{
+			"key": "file_id",
+			"value": ""
+		}
+	]
 }
