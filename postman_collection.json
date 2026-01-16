@@ -1736,6 +1736,38 @@
                               }
                         },
                         {
+                              "name": "Download Vault File",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{auth_token}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "x-vault-pin",
+                                                "value": "1234",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": "{{base_url}}/api/files/{{file_id}}/download"
+                              }
+                        },
+                        {
                               "name": "Restore File from Vault",
                               "event": [
                                     {

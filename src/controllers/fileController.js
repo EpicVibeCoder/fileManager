@@ -1,5 +1,6 @@
 const File = require('../models/File');
 const Folder = require('../models/Folder');
+const VaultPin = require('../models/VaultPin');
 const { checkStorageLimit, updateStorageUsage } = require('../services/storageService');
 const sendResponse = require('../utils/response');
 const fs = require('fs');
@@ -185,6 +186,23 @@ const downloadFile = async (req, res) => {
             const file = await File.findOne(query);
             if (!file) {
                   return sendResponse(res, 404, false, 'File not found');
+            }
+
+            if (file.isVault) {
+                  const pin = req.headers['x-vault-pin'];
+                  if (!pin) {
+                        return sendResponse(res, 401, false, 'Vault PIN required');
+                  }
+
+                  const vaultPin = await VaultPin.findOne({ userId: req.user._id });
+                  if (!vaultPin) {
+                        return sendResponse(res, 401, false, 'PIN not set');
+                  }
+
+                  const isMatch = await vaultPin.matchPin(pin);
+                  if (!isMatch) {
+                        return sendResponse(res, 401, false, 'Invalid PIN');
+                  }
             }
 
             // Validate physical path
