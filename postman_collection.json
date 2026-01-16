@@ -644,7 +644,7 @@
                   "name": "Phase 4: Google OAuth",
                   "item": [
                         {
-                              "name": "Initiate Google OAuth",
+                              "name": "Initiate Google OAuth (Test endpoint in browser. Recommended)",
                               "event": [
                                     {
                                           "listen": "test",
@@ -656,6 +656,23 @@
                                                       "",
                                                       "pm.test(\"Status code is 200 or 302\", function () {",
                                                       "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                                                      "});",
+                                                      "",
+                                                      "// Visualizer warning for user",
+                                                      "var template = `",
+                                                      "    <div style=\"background-color: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 5px; font-family: Arial, sans-serif;\">",
+                                                      "        <h3 style=\"margin-top: 0;\">⚠️ Action Required: Open in External Browser</h3>",
+                                                      "        <p>Google OAuth authentication <strong>will not work</strong> inside Postman properly (you may see a 'Disallowed User Agent' error or a blank page).</p>",
+                                                      "        <p>Please copy the full URL below and open it in your regular browser (Chrome, Firefox, Edge, etc.) to complete the login:</p>",
+                                                      "        <div style=\"background-color: #ffffff; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px; overflow-x: auto; margin-top: 10px;\">",
+                                                      "            <code style=\"white-space: pre-wrap; word-break: break-all;\">{{requestUrl}}</code>",
+                                                      "        </div>",
+                                                      "        <p style=\"margin-bottom: 0; margin-top: 15px; font-size: 0.9em; color: #6c757d;\">After logging in, you will be redirected to the callback URL. Copy the 'code' parameter from that URL to proceed to the next step.</p>",
+                                                      "    </div>",
+                                                      "`;",
+                                                      "",
+                                                      "pm.visualizer.set(template, {",
+                                                      "    requestUrl: pm.request.url.toString()",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -675,7 +692,7 @@
                               "response": []
                         },
                         {
-                              "name": "Google OAuth Callback",
+                              "name": "Google OAuth Callback (Test endpoint in browser. Recommended)",
                               "event": [
                                     {
                                           "listen": "test",
